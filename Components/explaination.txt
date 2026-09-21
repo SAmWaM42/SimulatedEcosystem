@@ -1,0 +1,4 @@
+This folder contains components used to build entities or other classes
+Only place classes that will be used for :
+i) Modelling behaviours
+ii) usable in some classes and not others

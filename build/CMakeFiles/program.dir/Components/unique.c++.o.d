@@ -1,7 +1,8 @@
-CMakeFiles/program.dir/ecosystem.c++.o: \
- /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/ecosystem.c++ \
- /usr/include/stdc-predef.h /usr/include/c++/15/iostream \
- /usr/include/c++/15/bits/requires_hosted.h \
+CMakeFiles/program.dir/Components/unique.c++.o: \
+ /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++ \
+ /usr/include/stdc-predef.h \
+ /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.h \
+ /usr/include/c++/15/iostream /usr/include/c++/15/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -160,15 +161,8 @@ CMakeFiles/program.dir/ecosystem.c++.o: \
  /usr/include/c++/15/bits/locale_facets.tcc \
  /usr/include/c++/15/bits/basic_ios.tcc \
  /usr/include/c++/15/bits/ostream.tcc /usr/include/c++/15/istream \
- /usr/include/c++/15/bits/istream.tcc \
- /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad/glad/glad.h \
- /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad/KHR/khrplatform.h \
- /usr/lib/gcc/x86_64-linux-gnu/15/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /usr/include/GLFW/glfw3.h \
- /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.h \
- /usr/include/c++/15/vector /usr/include/c++/15/bits/stl_uninitialized.h \
+ /usr/include/c++/15/bits/istream.tcc /usr/include/c++/15/vector \
+ /usr/include/c++/15/bits/stl_uninitialized.h \
  /usr/include/c++/15/bits/stl_vector.h \
  /usr/include/c++/15/bits/stl_bvector.h \
  /usr/include/c++/15/bits/vector.tcc /usr/include/c++/15/math.h \

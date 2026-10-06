@@ -85,12 +85,12 @@ clean: CMakeFiles/program.dir/clean
 CMakeFiles/program.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=1,2,3 "Built target program"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=1,2,3,4 "Built target program"
 .PHONY : CMakeFiles/program.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/program.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/program.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles 0
 .PHONY : CMakeFiles/program.dir/rule
@@ -102,7 +102,7 @@ program: CMakeFiles/program.dir/rule
 # codegen rule for target.
 CMakeFiles/program.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=1,2,3 "Finished codegen for target program"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=1,2,3,4 "Finished codegen for target program"
 .PHONY : CMakeFiles/program.dir/codegen
 
 # clean rule for target.

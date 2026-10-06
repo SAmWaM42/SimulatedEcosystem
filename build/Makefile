@@ -136,6 +136,30 @@ program/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/build
 .PHONY : program/fast
 
+Components/unique.o: Components/unique.c++.o
+.PHONY : Components/unique.o
+
+# target to build an object file
+Components/unique.c++.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.o
+.PHONY : Components/unique.c++.o
+
+Components/unique.i: Components/unique.c++.i
+.PHONY : Components/unique.i
+
+# target to preprocess a source file
+Components/unique.c++.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.i
+.PHONY : Components/unique.c++.i
+
+Components/unique.s: Components/unique.c++.s
+.PHONY : Components/unique.s
+
+# target to generate assembly for a file
+Components/unique.c++.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.s
+.PHONY : Components/unique.c++.s
+
 ecosystem.o: ecosystem.c++.o
 .PHONY : ecosystem.o
 
@@ -194,6 +218,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... program"
+	@echo "... Components/unique.o"
+	@echo "... Components/unique.i"
+	@echo "... Components/unique.s"
 	@echo "... ecosystem.o"
 	@echo "... ecosystem.i"
 	@echo "... ecosystem.s"

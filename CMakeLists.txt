@@ -9,6 +9,7 @@ target_sources(program
   PRIVATE
     ecosystem.c++
     glad/glad.c
+    Components/unique.c++
 )
 # any libraries you need basically check compile flags needed
 target_link_libraries(program

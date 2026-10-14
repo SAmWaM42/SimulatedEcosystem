@@ -1,4 +1,4 @@
 #pragma once
-class scene_manager{
-
-};
+#include <Geometry/primitives.h>
+class sceneManager
+{};

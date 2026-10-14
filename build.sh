@@ -1,11 +1,19 @@
+
 #!/usr/bin/env bash
-goal=$1
-if [ $goal = 'build' ]; then
+
+set -e
+goal="${1:-}"
+if [ "$goal" = "build" ]; then
     cmake -B build
     cmake --build build
-elif [ $goal = 'run' ]; then
-    echo $goal
+
+elif [ "$goal" = "test" ]; then
+    ./build/program test
+
+elif [ "$goal" = "run" ]; then
     ./build/program
+
 else
-    echo "pass valid build parameter (run or build)"
+    echo "Usage: $0 {build|test|run}"
+    exit 1
 fi

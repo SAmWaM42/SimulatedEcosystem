@@ -212,6 +212,22 @@ int main()
         {
             scene.camera.rotation.y += 1.0f;
         }
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        {
+            scene.camera.rotation.y -= 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        {
+            scene.camera.rotation.y += 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        {
+            scene.camera.rotation.x -= 1.0f;
+        }
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        {
+            scene.camera.rotation.x += 1.0f;
+        }
 
         // Animate the test cube slowly so the world-to-camera transform is easy to
         // inspect during an interactive test run.

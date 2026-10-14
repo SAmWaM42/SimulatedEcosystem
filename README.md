@@ -1,111 +1,87 @@
-# Simulated 3D Ecosystem
+# Simulated Ecosystem
 
-### An Interactive Visualization of Ecosystem Interactions and Genetic Inheritance
-
----
-
-## Description
-
-Simulated 3D Ecosystem is an interactive 3D application that models a simplified virtual
-ecosystem of plants, herbivores, and predators. Organisms move, feed, compete for
-resources, and reproduce, passing simplified genetic traits — such as size, speed, colour,
-and energy efficiency — to their offspring, with occasional random mutation.
-
-The project is intended as an educational visualization and experimentation tool for
-exploring ecosystem interactions (feeding, predation, competition) and genetic inheritance
-across multiple generations, rather than as a scientifically accurate biological model.
+A C++ project focused on building a lightweight 3D simulation environment where objects can be placed in world space, observed from a camera, and later extended into an ecosystem of entities and interactions.
 
 ---
 
-## Group Members & Responsibilities
+## Project Description
+
+This project is being developed as a simulation and rendering foundation for an ecosystem-style application. The current focus is on creating a functional 3D camera/view pipeline, world-space object placement, and a software renderer that can draw primitive geometry in a scene before adding higher-level simulation logic such as organisms, behaviours, and interactions.
+
+The aim is to establish a stable graphics foundation that can later support entity spawning, movement, interaction rules, and eventual UI overlays for observing the system.
+
+---
+
+## Group Members and Responsibilities
 
 | Member | Responsibility |
 |---|---|
-| Member 1 | 3D environment, terrain, scene construction, and graphical rendering |
-| Member 2 | Organism modelling, spawning, movement, and animation |
-| Member 3 | Ecosystem behaviour, interactions, collision detection, and organism states |
-| Member 4 | Genetic representation, inheritance, reproduction, and mutation |
-| Member 5 | User interface, camera controls, organism selection, and information display |
-| Member 6 | Integration, testing, performance optimization, documentation, and coordination |
+| Member 1 | 3D scene construction, object placement, and geometry representation |
+| Member 2 | Camera system, world-to-camera transforms, and projection logic |
+| Member 3 | Rendering pipeline, software rasterization, and line/triangle drawing |
+| Member 4 | Ecosystem entity modelling and simulation structure |
+| Member 5 | User interaction, controls, rendering validation, and testing |
+| Member 6 | Integration, documentation, build management, and project coordination |
 
-All members also share in integration, debugging, testing, and documentation.
-
----
-
-## Technologies / Tools
-
-- **C++** — core application language
-- **OpenGL** — real-time 3D rendering
-- **CMake** — build system / project configuration
-
-*(Additional libraries — e.g. windowing, math, model loading — to be listed here as they are
-added to the project.)*
+All group members contribute to testing, debugging, and final integration.
 
 ---
 
-## Graphics Techniques / Algorithms Implemented So Far
+## Technologies and Tools
 
-Development is currently focused on getting primary rendering working. Implemented so far:
-
-- Basic OpenGL window and rendering context setup
-- Core 3D geometry rendering (meshes/primitives for terrain and placeholder organism shapes)
-- Basic transformations (translation, rotation, scaling) for positioning objects in the scene
-- An initial 3D camera system for viewing the scene
-
-Not yet implemented: lighting/shading, organism animation, collision detection, genetic
-inheritance, and the user interface — these are planned for upcoming development phases.
+- C++
+- CMake
+- GLFW for window creation and input handling
+- OpenGL for window/display presentation only
+- Custom software rendering pipeline for world-space scene drawing
+- Standard C++ math and vector utilities for transforms and projection
 
 ---
 
-## How to Compile and Run
+## Graphics Techniques and Algorithms Implemented So Far
 
-The project is built using **CMake**.
+The current implementation includes the following graphics and rendering features:
+
+- Basic window creation and OpenGL context setup with GLFW
+- Simple 3D mesh generation for primitive objects such as cubes
+- World-space transform pipeline using position, rotation, and scale
+- Camera-based world-to-camera transformation logic
+- Perspective projection into screen space
+- Software framebuffer rendering with a depth buffer
+- Bresenham-style line drawing for primitive edge rendering
+- Triangle scanline filling using barycentric interpolation for solid surface coverage
+- Depth testing to ensure nearest visible fragments are drawn over farther ones
+- Simple camera movement and rotation controls for exploratory testing
+
+This is a foundational renderer for visualizing objects in a 3D scene rather than a complete OpenGL scene graph.
+
+---
+
+## How to Compile and Run the Current Version
+
+From the project root:
 
 ```bash
-# from the project root
-mkdir build
-cd build
-cmake ..
-cmake --build .
-```
-
-Once the build completes, the runnable executable will be located in the `build/`
-directory. Run it directly from there, e.g.:
-
-```bash
+cmake -S . -B build
+cmake --build build -- -j
 ./build/program
 ```
-This process has been automated in a build script
-to build/update the `build` DIR:
+
+A convenience build script is also included:
+
 ```bash
 ./build.sh build
-```
-to run the executable:
-```bash
 ./build.sh run
 ```
 
 ---
 
-## Current Progress
+## Current State
 
-Primary rendering is currently being handled. 
-
----
-
-## Known Limitations / Issues
-
-- No organism behaviour yet (feeding, predation, reproduction, competition are not
-  implemented).
-- No genetic representation, inheritance, or mutation implemented yet.
-- No collision detection or distance-based interaction checks yet.
-- No animation system — organisms are currently static placeholders.
-- No user interface (simulation controls, organism selection, or information display).
-- No lighting/shading applied yet — current rendering is primitive/unshaded.
-- Project is in an early stage; performance and stability have not yet been evaluated at
-  scale.
+The project is currently in a renderer prototype stage. The system is capable of creating a simple 3D scene, positioning objects in world space, moving and rotating a camera, and drawing primitives through a custom software rendering path. The goal is to extend this base into a broader ecosystem simulation with multiple entities and interactions.
 
 ---
 
-*This README reflects the current (early) state of the project and will be updated as
-development progresses.*
+## Notes
+
+This README reflects the current implementation status and will continue to be updated as the project grows.

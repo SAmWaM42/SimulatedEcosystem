@@ -59,19 +59,35 @@ This is a foundational renderer for visualizing objects in a 3D scene rather tha
 
 ## How to Compile and Run the Current Version
 
-From the project root:
+### Prerequisites
 
+- **C++17 compiler**: MinGW GCC (g++ in `C:\MinGW\bin\`)
+- **CMake 3.16+** (tested with 4.2.3)
+- **GLFW**: Automatically fetched and built from source via CMake `FetchContent` (no manual install needed)
+- **OpenGL**: Windows system library (`opengl32`) — included with MinGW
+
+### Option A: Using VS Code
+
+1. Install the recommended VS Code extensions: **CMake Tools**, **C/C++** (by Microsoft)
+2. Open the project folder in VS Code
+3. Select the compiler when prompted (or via **CMake: Select a kit** → `GCC`)
+4. To configure + build: run the **Terminal → Run Build Task** (`Ctrl+Shift+B`) and select **Build**
+5. To run: execute the **Run** task, or press `F5` to launch with the debugger
+
+
+
+### Option B: In the Command Line (Git Bash / MSYS2)
 ```bash
-cmake -S . -B build
-cmake --build build -- -j
-./build/program
+./build.sh build      # configures with MinGW Makefiles and builds
+./build.sh run        # runs the executable
 ```
 
-A convenience build script is also included:
+Or manually:
 
 ```bash
-./build.sh build
-./build.sh run
+cmake -B build -G "MinGW Makefiles"
+cmake --build build
+./build/program.exe
 ```
 
 ---

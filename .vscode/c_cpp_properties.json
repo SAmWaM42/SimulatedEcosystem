@@ -1,0 +1,36 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "C:/MinGW/bin/g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/glad",
+                "${workspaceFolder}/Components",
+                "${workspaceFolder}/Entities",
+                "${workspaceFolder}/Geometry",
+                "${workspaceFolder}/Managers",
+                "${workspaceFolder}/Rendering",
+                "${workspaceFolder}/Inc",
+                "${workspaceFolder}/Tests",
+                "${workspaceFolder}/build/_deps/glfw-src/include"
+            ],
+            "defines": [
+                "_WIN32",
+                "GLFW_INCLUDE_NONE"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/build/_deps/glfw-src/include"
+                ],
+                "limitSymbolsToIncludedHeaders": false,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}

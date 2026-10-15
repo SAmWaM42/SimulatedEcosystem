@@ -1,0 +1,54 @@
+# Build output
+build/
+build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+install_manifest.txt
+
+# Compiled object files
+*.o
+*.obj
+*.o.d
+
+# Executables and libraries
+program
+program.exe
+*.exe
+*.dll
+*.a
+*.so
+*.dylib
+*.lib
+*.pdb
+
+# IDE / Editor
+.vscode/ipch/
+.vscode/.browse/
+*.user
+*.suo
+*.swp
+*~
+.DS_Store
+
+# Dependency download cache (FetchContent)
+_deps/
+.deps/
+
+# Logs and output
+*.log
+out.txt
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+
+# GLFW extracted downloads (temporary)
+glfw-3.4.bin.*/
+glfw-3.4.zip

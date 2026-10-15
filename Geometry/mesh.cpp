@@ -6,29 +6,6 @@
 
 #include <cmath>
 
-namespace
-{
-Vec3 rotatePoint(const Vec3 &point, const Vec3 &rotation)
-{
-    const float rx = rotation.x * static_cast<float>(M_PI) / 180.0f;
-    const float ry = rotation.y * static_cast<float>(M_PI) / 180.0f;
-    const float rz = rotation.z * static_cast<float>(M_PI) / 180.0f;
-
-    const float sx = std::sin(rx);
-    const float cx = std::cos(rx);
-    const float sy = std::sin(ry);
-    const float cy = std::cos(ry);
-    const float sz = std::sin(rz);
-    const float cz = std::cos(rz);
-
-    Vec3 p;
-    p.x = point.x * (cy * cz) + point.y * (sx * sy * cz - cx * sz) + point.z * (cx * sy * cz + sx * sz);
-    p.y = point.x * (cy * sz) + point.y * (sx * sy * sz + cx * cz) + point.z * (cx * sy * sz - sx * cz);
-    p.z = point.x * (-sy) + point.y * (sx * cy) + point.z * (cx * cy);
-    return p;
-}
-} // namespace
-
 Vec3 Vec3::operator+(const Vec3 &other) const
 {
     return Vec3{x + other.x, y + other.y, z + other.z};
@@ -51,13 +28,12 @@ Vec3 Vec3::operator/(float scalar) const
 
 Vec3 applyTransform(const Vec3 &point, const Transform &transform)
 {
-    Vec3 scaled = point;
-    scaled.x *= transform.scale.x;
-    scaled.y *= transform.scale.y;
-    scaled.z *= transform.scale.z;
-
-    Vec3 rotated = rotatePoint(scaled, transform.rotation);
-    return Vec3{rotated.x + transform.position.x, rotated.y + transform.position.y, rotated.z + transform.position.z};
+    Transformer modelTransform;
+    modelTransform.rotate(transform.rotation);
+    modelTransform.scale(transform.scale);
+    modelTransform.translate(transform.position);
+    modelTransform.set_tranformation_matrix();
+    return modelTransform.transform(point, 1.0f);
 }
 
 void Mesh::addTriangle(const Vec3 &a, const Vec3 &b, const Vec3 &c)

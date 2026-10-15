@@ -152,8 +152,16 @@ void Renderer::render()
         return;
     }
 
+    scene->camera.updateViewMatrix();
+
     for (const auto &object : scene->getObjects())
     {
+        Transformer objectTransform;
+        objectTransform.rotate(object.transform.rotation);
+        objectTransform.scale(object.transform.scale);
+        objectTransform.translate(object.transform.position);
+        objectTransform.set_tranformation_matrix();
+
         for (size_t i = 0; i < object.mesh.indices.size(); i += 3)
         {
             const int aIndex = static_cast<int>(object.mesh.indices[i]);
@@ -164,9 +172,9 @@ void Renderer::render()
             const Vec3 bLocal = object.mesh.vertices[bIndex];
             const Vec3 cLocal = object.mesh.vertices[cIndex];
 
-            const Vec3 aWorld = applyTransform(aLocal, object.transform);
-            const Vec3 bWorld = applyTransform(bLocal, object.transform);
-            const Vec3 cWorld = applyTransform(cLocal, object.transform);
+            const Vec3 aWorld = objectTransform.transform(aLocal, 1.0f);
+            const Vec3 bWorld = objectTransform.transform(bLocal, 1.0f);
+            const Vec3 cWorld = objectTransform.transform(cLocal, 1.0f);
 
             const Vec3 aScreen = scene->camera.projectToScreen(aWorld, width, height);
             const Vec3 bScreen = scene->camera.projectToScreen(bWorld, width, height);

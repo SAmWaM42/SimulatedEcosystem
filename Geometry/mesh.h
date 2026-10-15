@@ -2,32 +2,7 @@
 
 #include <vector>
 #include <cstdint>
-
-struct Vec2
-{
-    float x;
-    float y;
-};
-
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-
-    Vec3 operator+(const Vec3 &other) const;
-    Vec3 operator-(const Vec3 &other) const;
-    Vec3 operator*(float scalar) const;
-    Vec3 operator/(float scalar) const;
-};
-
-struct Transform
-{
-    Vec3 position;
-    Vec3 rotation;
-    Vec3 scale;
-};
-
+#include <primitives.h>
 struct Mesh
 {
     std::vector<Vec3> vertices;

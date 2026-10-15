@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = 
 
-C_INCLUDES = -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Entities -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Inc
+C_INCLUDES = -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Entities -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Inc -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Tests
 
 C_FLAGS = -Wall -Wextra
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Entities -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Inc
+CXX_INCLUDES = -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Entities -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Inc -I/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Tests
 
 CXX_FLAGS = -std=gnu++17 -Wall -Wextra
 

@@ -9,7 +9,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad/glad.c" "CMakeFiles/program.dir/glad/glad.c.o" "gcc" "CMakeFiles/program.dir/glad/glad.c.o.d"
-  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++" "CMakeFiles/program.dir/Components/unique.c++.o" "gcc" "CMakeFiles/program.dir/Components/unique.c++.o.d"
+  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/mesh.cpp" "CMakeFiles/program.dir/Geometry/mesh.cpp.o" "gcc" "CMakeFiles/program.dir/Geometry/mesh.cpp.o.d"
+  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/primitives.c++" "CMakeFiles/program.dir/Geometry/primitives.c++.o" "gcc" "CMakeFiles/program.dir/Geometry/primitives.c++.o.d"
+  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers/scene_manager.cpp" "CMakeFiles/program.dir/Managers/scene_manager.cpp.o" "gcc" "CMakeFiles/program.dir/Managers/scene_manager.cpp.o.d"
+  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/camera.cpp" "CMakeFiles/program.dir/Rendering/camera.cpp.o" "gcc" "CMakeFiles/program.dir/Rendering/camera.cpp.o.d"
+  "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/renderer.cpp" "CMakeFiles/program.dir/Rendering/renderer.cpp.o" "gcc" "CMakeFiles/program.dir/Rendering/renderer.cpp.o.d"
   "/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/ecosystem.c++" "CMakeFiles/program.dir/ecosystem.c++.o" "gcc" "CMakeFiles/program.dir/ecosystem.c++.o.d"
   "" "program" "gcc" "CMakeFiles/program.dir/link.d"
   )

@@ -4,7 +4,11 @@ program: \
   /usr/lib/gcc/x86_64-linux-gnu/15/crtbeginS.o \
   CMakeFiles/program.dir/ecosystem.c++.o \
   CMakeFiles/program.dir/glad/glad.c.o \
-  CMakeFiles/program.dir/Components/unique.c++.o \
+  CMakeFiles/program.dir/Geometry/primitives.c++.o \
+  CMakeFiles/program.dir/Geometry/mesh.cpp.o \
+  CMakeFiles/program.dir/Rendering/camera.cpp.o \
+  CMakeFiles/program.dir/Rendering/renderer.cpp.o \
+  CMakeFiles/program.dir/Managers/scene_manager.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libglfw.so \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libGL.so \
   /usr/lib/gcc/x86_64-linux-gnu/15/libstdc++.so \
@@ -45,7 +49,15 @@ CMakeFiles/program.dir/ecosystem.c++.o:
 
 CMakeFiles/program.dir/glad/glad.c.o:
 
-CMakeFiles/program.dir/Components/unique.c++.o:
+CMakeFiles/program.dir/Geometry/primitives.c++.o:
+
+CMakeFiles/program.dir/Geometry/mesh.cpp.o:
+
+CMakeFiles/program.dir/Rendering/camera.cpp.o:
+
+CMakeFiles/program.dir/Rendering/renderer.cpp.o:
+
+CMakeFiles/program.dir/Managers/scene_manager.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libglfw.so:
 

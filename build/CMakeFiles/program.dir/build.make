@@ -100,36 +100,100 @@ CMakeFiles/program.dir/glad/glad.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/program.dir/glad/glad.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/glad/glad.c -o CMakeFiles/program.dir/glad/glad.c.s
 
-CMakeFiles/program.dir/Components/unique.c++.o: CMakeFiles/program.dir/flags.make
-CMakeFiles/program.dir/Components/unique.c++.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++
-CMakeFiles/program.dir/Components/unique.c++.o: CMakeFiles/program.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/program.dir/Components/unique.c++.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Components/unique.c++.o -MF CMakeFiles/program.dir/Components/unique.c++.o.d -o CMakeFiles/program.dir/Components/unique.c++.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++
+CMakeFiles/program.dir/Geometry/primitives.c++.o: CMakeFiles/program.dir/flags.make
+CMakeFiles/program.dir/Geometry/primitives.c++.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/primitives.c++
+CMakeFiles/program.dir/Geometry/primitives.c++.o: CMakeFiles/program.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/program.dir/Geometry/primitives.c++.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Geometry/primitives.c++.o -MF CMakeFiles/program.dir/Geometry/primitives.c++.o.d -o CMakeFiles/program.dir/Geometry/primitives.c++.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/primitives.c++
 
-CMakeFiles/program.dir/Components/unique.c++.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Components/unique.c++.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++ > CMakeFiles/program.dir/Components/unique.c++.i
+CMakeFiles/program.dir/Geometry/primitives.c++.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Geometry/primitives.c++.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/primitives.c++ > CMakeFiles/program.dir/Geometry/primitives.c++.i
 
-CMakeFiles/program.dir/Components/unique.c++.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Components/unique.c++.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Components/unique.c++ -o CMakeFiles/program.dir/Components/unique.c++.s
+CMakeFiles/program.dir/Geometry/primitives.c++.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Geometry/primitives.c++.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/primitives.c++ -o CMakeFiles/program.dir/Geometry/primitives.c++.s
+
+CMakeFiles/program.dir/Geometry/mesh.cpp.o: CMakeFiles/program.dir/flags.make
+CMakeFiles/program.dir/Geometry/mesh.cpp.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/mesh.cpp
+CMakeFiles/program.dir/Geometry/mesh.cpp.o: CMakeFiles/program.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/program.dir/Geometry/mesh.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Geometry/mesh.cpp.o -MF CMakeFiles/program.dir/Geometry/mesh.cpp.o.d -o CMakeFiles/program.dir/Geometry/mesh.cpp.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/mesh.cpp
+
+CMakeFiles/program.dir/Geometry/mesh.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Geometry/mesh.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/mesh.cpp > CMakeFiles/program.dir/Geometry/mesh.cpp.i
+
+CMakeFiles/program.dir/Geometry/mesh.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Geometry/mesh.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Geometry/mesh.cpp -o CMakeFiles/program.dir/Geometry/mesh.cpp.s
+
+CMakeFiles/program.dir/Rendering/camera.cpp.o: CMakeFiles/program.dir/flags.make
+CMakeFiles/program.dir/Rendering/camera.cpp.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/camera.cpp
+CMakeFiles/program.dir/Rendering/camera.cpp.o: CMakeFiles/program.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/program.dir/Rendering/camera.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Rendering/camera.cpp.o -MF CMakeFiles/program.dir/Rendering/camera.cpp.o.d -o CMakeFiles/program.dir/Rendering/camera.cpp.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/camera.cpp
+
+CMakeFiles/program.dir/Rendering/camera.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Rendering/camera.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/camera.cpp > CMakeFiles/program.dir/Rendering/camera.cpp.i
+
+CMakeFiles/program.dir/Rendering/camera.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Rendering/camera.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/camera.cpp -o CMakeFiles/program.dir/Rendering/camera.cpp.s
+
+CMakeFiles/program.dir/Rendering/renderer.cpp.o: CMakeFiles/program.dir/flags.make
+CMakeFiles/program.dir/Rendering/renderer.cpp.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/renderer.cpp
+CMakeFiles/program.dir/Rendering/renderer.cpp.o: CMakeFiles/program.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/program.dir/Rendering/renderer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Rendering/renderer.cpp.o -MF CMakeFiles/program.dir/Rendering/renderer.cpp.o.d -o CMakeFiles/program.dir/Rendering/renderer.cpp.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/renderer.cpp
+
+CMakeFiles/program.dir/Rendering/renderer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Rendering/renderer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/renderer.cpp > CMakeFiles/program.dir/Rendering/renderer.cpp.i
+
+CMakeFiles/program.dir/Rendering/renderer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Rendering/renderer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Rendering/renderer.cpp -o CMakeFiles/program.dir/Rendering/renderer.cpp.s
+
+CMakeFiles/program.dir/Managers/scene_manager.cpp.o: CMakeFiles/program.dir/flags.make
+CMakeFiles/program.dir/Managers/scene_manager.cpp.o: /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers/scene_manager.cpp
+CMakeFiles/program.dir/Managers/scene_manager.cpp.o: CMakeFiles/program.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/program.dir/Managers/scene_manager.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/program.dir/Managers/scene_manager.cpp.o -MF CMakeFiles/program.dir/Managers/scene_manager.cpp.o.d -o CMakeFiles/program.dir/Managers/scene_manager.cpp.o -c /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers/scene_manager.cpp
+
+CMakeFiles/program.dir/Managers/scene_manager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/program.dir/Managers/scene_manager.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers/scene_manager.cpp > CMakeFiles/program.dir/Managers/scene_manager.cpp.i
+
+CMakeFiles/program.dir/Managers/scene_manager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/program.dir/Managers/scene_manager.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/Managers/scene_manager.cpp -o CMakeFiles/program.dir/Managers/scene_manager.cpp.s
 
 # Object files for target program
 program_OBJECTS = \
 "CMakeFiles/program.dir/ecosystem.c++.o" \
 "CMakeFiles/program.dir/glad/glad.c.o" \
-"CMakeFiles/program.dir/Components/unique.c++.o"
+"CMakeFiles/program.dir/Geometry/primitives.c++.o" \
+"CMakeFiles/program.dir/Geometry/mesh.cpp.o" \
+"CMakeFiles/program.dir/Rendering/camera.cpp.o" \
+"CMakeFiles/program.dir/Rendering/renderer.cpp.o" \
+"CMakeFiles/program.dir/Managers/scene_manager.cpp.o"
 
 # External object files for target program
 program_EXTERNAL_OBJECTS =
 
 program: CMakeFiles/program.dir/ecosystem.c++.o
 program: CMakeFiles/program.dir/glad/glad.c.o
-program: CMakeFiles/program.dir/Components/unique.c++.o
+program: CMakeFiles/program.dir/Geometry/primitives.c++.o
+program: CMakeFiles/program.dir/Geometry/mesh.cpp.o
+program: CMakeFiles/program.dir/Rendering/camera.cpp.o
+program: CMakeFiles/program.dir/Rendering/renderer.cpp.o
+program: CMakeFiles/program.dir/Managers/scene_manager.cpp.o
 program: CMakeFiles/program.dir/build.make
 program: CMakeFiles/program.dir/compiler_depend.ts
 program: CMakeFiles/program.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable program"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/samuel/Documents/School/4.2/compGraphics/SimulatedEcosystem/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable program"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/program.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

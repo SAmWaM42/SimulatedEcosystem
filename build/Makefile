@@ -136,29 +136,125 @@ program/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/build
 .PHONY : program/fast
 
-Components/unique.o: Components/unique.c++.o
-.PHONY : Components/unique.o
+Geometry/mesh.o: Geometry/mesh.cpp.o
+.PHONY : Geometry/mesh.o
 
 # target to build an object file
-Components/unique.c++.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.o
-.PHONY : Components/unique.c++.o
+Geometry/mesh.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/mesh.cpp.o
+.PHONY : Geometry/mesh.cpp.o
 
-Components/unique.i: Components/unique.c++.i
-.PHONY : Components/unique.i
+Geometry/mesh.i: Geometry/mesh.cpp.i
+.PHONY : Geometry/mesh.i
 
 # target to preprocess a source file
-Components/unique.c++.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.i
-.PHONY : Components/unique.c++.i
+Geometry/mesh.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/mesh.cpp.i
+.PHONY : Geometry/mesh.cpp.i
 
-Components/unique.s: Components/unique.c++.s
-.PHONY : Components/unique.s
+Geometry/mesh.s: Geometry/mesh.cpp.s
+.PHONY : Geometry/mesh.s
 
 # target to generate assembly for a file
-Components/unique.c++.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Components/unique.c++.s
-.PHONY : Components/unique.c++.s
+Geometry/mesh.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/mesh.cpp.s
+.PHONY : Geometry/mesh.cpp.s
+
+Geometry/primitives.o: Geometry/primitives.c++.o
+.PHONY : Geometry/primitives.o
+
+# target to build an object file
+Geometry/primitives.c++.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/primitives.c++.o
+.PHONY : Geometry/primitives.c++.o
+
+Geometry/primitives.i: Geometry/primitives.c++.i
+.PHONY : Geometry/primitives.i
+
+# target to preprocess a source file
+Geometry/primitives.c++.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/primitives.c++.i
+.PHONY : Geometry/primitives.c++.i
+
+Geometry/primitives.s: Geometry/primitives.c++.s
+.PHONY : Geometry/primitives.s
+
+# target to generate assembly for a file
+Geometry/primitives.c++.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Geometry/primitives.c++.s
+.PHONY : Geometry/primitives.c++.s
+
+Managers/scene_manager.o: Managers/scene_manager.cpp.o
+.PHONY : Managers/scene_manager.o
+
+# target to build an object file
+Managers/scene_manager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Managers/scene_manager.cpp.o
+.PHONY : Managers/scene_manager.cpp.o
+
+Managers/scene_manager.i: Managers/scene_manager.cpp.i
+.PHONY : Managers/scene_manager.i
+
+# target to preprocess a source file
+Managers/scene_manager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Managers/scene_manager.cpp.i
+.PHONY : Managers/scene_manager.cpp.i
+
+Managers/scene_manager.s: Managers/scene_manager.cpp.s
+.PHONY : Managers/scene_manager.s
+
+# target to generate assembly for a file
+Managers/scene_manager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Managers/scene_manager.cpp.s
+.PHONY : Managers/scene_manager.cpp.s
+
+Rendering/camera.o: Rendering/camera.cpp.o
+.PHONY : Rendering/camera.o
+
+# target to build an object file
+Rendering/camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/camera.cpp.o
+.PHONY : Rendering/camera.cpp.o
+
+Rendering/camera.i: Rendering/camera.cpp.i
+.PHONY : Rendering/camera.i
+
+# target to preprocess a source file
+Rendering/camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/camera.cpp.i
+.PHONY : Rendering/camera.cpp.i
+
+Rendering/camera.s: Rendering/camera.cpp.s
+.PHONY : Rendering/camera.s
+
+# target to generate assembly for a file
+Rendering/camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/camera.cpp.s
+.PHONY : Rendering/camera.cpp.s
+
+Rendering/renderer.o: Rendering/renderer.cpp.o
+.PHONY : Rendering/renderer.o
+
+# target to build an object file
+Rendering/renderer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/renderer.cpp.o
+.PHONY : Rendering/renderer.cpp.o
+
+Rendering/renderer.i: Rendering/renderer.cpp.i
+.PHONY : Rendering/renderer.i
+
+# target to preprocess a source file
+Rendering/renderer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/renderer.cpp.i
+.PHONY : Rendering/renderer.cpp.i
+
+Rendering/renderer.s: Rendering/renderer.cpp.s
+.PHONY : Rendering/renderer.s
+
+# target to generate assembly for a file
+Rendering/renderer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/program.dir/build.make CMakeFiles/program.dir/Rendering/renderer.cpp.s
+.PHONY : Rendering/renderer.cpp.s
 
 ecosystem.o: ecosystem.c++.o
 .PHONY : ecosystem.o
@@ -218,9 +314,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... program"
-	@echo "... Components/unique.o"
-	@echo "... Components/unique.i"
-	@echo "... Components/unique.s"
+	@echo "... Geometry/mesh.o"
+	@echo "... Geometry/mesh.i"
+	@echo "... Geometry/mesh.s"
+	@echo "... Geometry/primitives.o"
+	@echo "... Geometry/primitives.i"
+	@echo "... Geometry/primitives.s"
+	@echo "... Managers/scene_manager.o"
+	@echo "... Managers/scene_manager.i"
+	@echo "... Managers/scene_manager.s"
+	@echo "... Rendering/camera.o"
+	@echo "... Rendering/camera.i"
+	@echo "... Rendering/camera.s"
+	@echo "... Rendering/renderer.o"
+	@echo "... Rendering/renderer.i"
+	@echo "... Rendering/renderer.s"
 	@echo "... ecosystem.o"
 	@echo "... ecosystem.i"
 	@echo "... ecosystem.s"

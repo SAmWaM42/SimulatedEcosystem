@@ -16,12 +16,12 @@ The aim is to establish a stable graphics foundation that can later support enti
 
 | Member | Responsibility |
 |---|---|
-| Member 1 | 3D scene construction, object placement, and geometry representation |
-| Member 2 | Camera system, world-to-camera transforms, and projection logic |
-| Member 3 | Rendering pipeline, software rasterization, and line/triangle drawing |
-| Member 4 | Ecosystem entity modelling and simulation structure |
-| Member 5 | User interaction, controls, rendering validation, and testing |
-| Member 6 | Integration, documentation, build management, and project coordination |
+| Samuel Wamae | 3D scene construction, object placement, and geometry representation |
+| Philip Gakuo| Camera system, world-to-camera transforms, and projection logic |
+| Njihia Muranga| Rendering pipeline, software rasterization, and line/triangle drawing |
+| Philip Leo | Ecosystem entity modelling and simulation structure |
+| Kelvin Maina | User interaction, controls, rendering validation, and testing |
+| Ronah Abucheli | Integration, documentation, build management, and project coordination |
 
 All group members contribute to testing, debugging, and final integration.
 

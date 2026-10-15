@@ -18,7 +18,7 @@ Matrix::Matrix()
         this->m_values[i] = identity_matrix[i];
     };
 } // ensures that used matrices start as 4*4 identity matrix
-Matrix Matrix::inverse_rotation(const Matrix& rotation_matrix)
+Matrix Matrix::inverse_rotation(const Matrix& rotation_matrix) const
 {
     Matrix result;
 
@@ -48,7 +48,7 @@ Matrix Matrix::inverse_rotation(const Matrix& rotation_matrix)
     return result;
 }
 //inverse
-Vec4 Matrix::muliplyByVec(Vec4 val)
+Vec4 Matrix::muliplyByVec(Vec4 val) const
 {
     Vec4 to_Return = {};
     to_Return.x = (m_values[0].x * val.x) + (m_values[0].y * val.y) + (m_values[0].z * val.z) + (m_values[0].w * val.w);
@@ -58,7 +58,7 @@ Vec4 Matrix::muliplyByVec(Vec4 val)
 
     return to_Return;
 };
-Matrix Matrix::muliplyBymat(Matrix val)
+Matrix Matrix::muliplyBymat(Matrix val) const
 {
     // implementation
     Matrix to_Return;
@@ -168,77 +168,4 @@ void Shape::world_transform(Transformer t_form)
         w_vertices.push_back(n_Vertice);
     }
     return;
-}
-// camera work
-void Camera::update_view_matrix()
-{
-    // Build the camera's forward rotation matrix.
-    Transformer rotation_builder;
-    rotation_builder.rotate(rotation);
-
-    // A view matrix must undo the camera's rotation.
-    Matrix inverse_rot =inverse_rot.inverse_rotation(rotation_builder.rotation_matrix);
-
-    // Build the inverse translation.
-    Transformer translation_builder;
-    translation_builder.translate({
-        -position.x,
-        -position.y,
-        -position.z
-    });
-
-    // View = inverse rotation * inverse translation.
-    view_matrix = inverse_rot.muliplyBymat(
-        translation_builder.translation_matrix
-    );
-}
-Vec3 Camera::world_to_camera(Vec3 point)
-{
-    Vec4 result = view_matrix.muliplyByVec({
-        point.x,
-        point.y,
-        point.z,
-        1.0f
-    });
-
-    return {result.x, result.y, result.z};
-}
-// projection'
-bool Projection::project_point(Vec3 camera_point, Vec2& projected)
-{
-    // Reject points outside the camera's depth range.
-    if (camera_point.z <= near_plane ||
-        camera_point.z > far_plane)
-    {
-        return false;
-    }
-
-    // Calculate the focal scale from the vertical field of view.
-    float f = 1.0f / std::tan(degree_to_radians(fov) / 2.0f);
-
-    // Perspective projection into normalized device coordinates.
-    projected.x = (f / aspect_ratio) *
-                  (camera_point.x / camera_point.z);
-
-    projected.y = f *
-                  (camera_point.y / camera_point.z);
-
-    return true;
-}
-
-// scene implementation
-void Scene::add_shape(std::unique_ptr<Shape> n_Shape)
-{
-    shapes.push_back(std::move(n_Shape));
-};
-void Scene::remove_shape(Shape *n_shape)
-{
-    for (auto it = shapes.begin(); it != shapes.end(); ++it)
-    {
-        if (it->get() == n_shape)
-        {
-            shapes.erase(it);
-            return;
-        }
-    };
 }

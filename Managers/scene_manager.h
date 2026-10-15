@@ -10,7 +10,7 @@ struct SceneObject
     Mesh mesh;
     Transform transform;
     Vec3 color;
-};
+};// base class for all obj in the scene
 
 class SceneManager
 {

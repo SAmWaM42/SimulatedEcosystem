@@ -10,9 +10,11 @@ struct Camera
     float aspectRatio;
     float nearPlane;
     float farPlane;
+    Matrix viewMatrix;
+    bool viewDirty;
 
     Camera();
-
+    void updateViewMatrix();
     Vec3 worldToCamera(const Vec3 &point) const;
     Vec3 projectToScreen(const Vec3 &point, int width, int height) const;
     bool isVisible(const Vec3 &point) const;

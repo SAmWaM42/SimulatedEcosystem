@@ -1,0 +1,8 @@
+# Ignore build output and local IDE folders.
+build*/
+.vs/
+.vscode/
+.idea/
+
+# Agent context file
+PROJECT_NOTES.md

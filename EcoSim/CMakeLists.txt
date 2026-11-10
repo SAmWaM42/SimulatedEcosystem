@@ -62,6 +62,12 @@ add_executable(sim_tests
 )
 target_link_libraries(sim_tests PRIVATE eco_sim doctest::doctest)
 
+add_executable(behaviour_tests
+    tests/behaviour_tests.cpp
+)
+target_link_libraries(behaviour_tests PRIVATE eco_sim doctest::doctest)
+
 enable_testing()
 add_test(NAME genetics COMMAND genetics_tests)
 add_test(NAME sim COMMAND sim_tests)
+add_test(NAME behaviour COMMAND behaviour_tests)

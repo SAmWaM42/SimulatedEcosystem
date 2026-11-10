@@ -56,9 +56,11 @@ void Simulation::populate() {
 
 void Simulation::step() {
     spatialGrid.clear();
+    byId.clear();
     for (const std::unique_ptr<Organism>& organism : population) {
         if (organism->alive) {
             spatialGrid.insert(organism.get());
+            byId.emplace(organism->id, organism.get());
         }
     }
 
@@ -67,6 +69,17 @@ void Simulation::step() {
     for (std::size_t i = 0; i < populationSize; ++i) {
         if (population[i]->alive) {
             population[i]->update(settings.fixedDt, *this);
+        }
+    }
+
+    // Record every removal before destroying the objects; also drop their ids
+    // from the lookup so find() never sees a dangling pointer between steps.
+    for (const std::unique_ptr<Organism>& organism : population) {
+        if (!organism->alive) {
+            const int kindIndex = static_cast<int>(organism->kind());
+            const int causeIndex = static_cast<int>(organism->deathCause);
+            ++deathCounts[kindIndex][causeIndex];
+            byId.erase(organism->id);
         }
     }
 
@@ -158,8 +171,22 @@ float Simulation::meanSight(Kind k) const {
     return static_cast<float>(sightSum / static_cast<double>(animalCount));
 }
 
+Organism* Simulation::find(uint32_t id) const {
+    const auto entry = byId.find(id);
+    if (entry == byId.end() || entry->second == nullptr ||
+        !entry->second->alive) {
+        return nullptr;
+    }
+    return entry->second;
+}
+
+int Simulation::deathCount(Kind kind, DeathCause cause) const {
+    return deathCounts[static_cast<int>(kind)][static_cast<int>(cause)];
+}
+
 void Simulation::flushPending() {
     for (std::unique_ptr<Organism>& organism : pending) {
+        byId[organism->id] = organism.get();
         population.push_back(std::move(organism));
     }
     pending.clear();

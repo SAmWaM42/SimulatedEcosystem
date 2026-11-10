@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "core/Rng.h"
@@ -51,6 +52,13 @@ public:
     // when none of that kind live.
     float meanSight(Kind k) const;
 
+    // Returns the living organism with this id, or nullptr; the lookup is
+    // rebuilt at the start of every step so behaviour never stores raw pointers.
+    Organism* find(uint32_t id) const;
+
+    // Returns the cumulative number of removed organisms of a kind and cause.
+    int deathCount(Kind kind, DeathCause cause) const;
+
     // Moves all queued organisms into the main population immediately; tests
     // use this after addOrganism to make hand-built organisms visible.
     void flushPending();
@@ -62,6 +70,8 @@ private:
     SpatialGrid spatialGrid;
     std::vector<std::unique_ptr<Organism>> population;
     std::vector<std::unique_ptr<Organism>> pending;
+    std::unordered_map<uint32_t, Organism*> byId;  // rebuilt each step
+    int deathCounts[3][4] = {};  // [Kind][DeathCause], cumulative
     uint32_t nextIdValue = 1;
     double simTime = 0.0;
 };

@@ -1,5 +1,5 @@
-// Headless driver for the simulation: prints population and sight statistics
-// over time so the foundation can be checked without any graphics.
+// Headless driver for the simulation: prints population, sight, and death
+// statistics over time so the simulation can be checked without graphics.
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -8,12 +8,21 @@
 #include "sim/Simulation.h"
 
 namespace {
-// Prints one fixed-width row of population statistics.
+// Sums herbivore and predator deaths for one cause.
+int animalDeaths(const Simulation& sim, DeathCause cause) {
+    return sim.deathCount(Kind::Herbivore, cause) +
+           sim.deathCount(Kind::Predator, cause);
+}
+
+// Prints one fixed-width row of population, sight, and death statistics.
 void printRow(const Simulation& sim) {
-    std::printf("%8.1f %8d %10d %10d %14.2f %14.2f\n",
+    std::printf("%8.1f %8d %10d %10d %14.2f %14.2f %10d %10d %10d\n",
                 sim.time(), sim.count(Kind::Plant),
                 sim.count(Kind::Herbivore), sim.count(Kind::Predator),
-                sim.meanSight(Kind::Herbivore), sim.meanSight(Kind::Predator));
+                sim.meanSight(Kind::Herbivore), sim.meanSight(Kind::Predator),
+                animalDeaths(sim, DeathCause::Starved),
+                animalDeaths(sim, DeathCause::OldAge),
+                animalDeaths(sim, DeathCause::Eaten));
 }
 }  // namespace
 
@@ -39,8 +48,9 @@ int main(int argc, char** argv) {
         totalSteps = 0;
     }
 
-    std::printf("%8s %8s %10s %10s %14s %14s\n", "time", "plants",
-                "herbivores", "predators", "herbSight", "predSight");
+    std::printf("%8s %8s %10s %10s %14s %14s %10s %10s %10s\n", "time",
+                "plants", "herbivores", "predators", "herbSight", "predSight",
+                "starved", "oldAge", "eaten");
     printRow(sim);
 
     for (int step = 1; step <= totalSteps; ++step) {

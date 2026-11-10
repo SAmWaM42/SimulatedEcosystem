@@ -29,6 +29,12 @@ struct SimConfig {
     float wanderTurnMin = 1.5f;
     float wanderTurnMax = 4.0f;
     float wanderTurnAngle = 0.8f;
+    float senseInterval = 0.3f;        // seconds between perception scans
+    float hungerThreshold = 0.8f;      // animals look for food below this fraction of maxEnergy
+    float eatReach = 16.f;             // distance at which an animal can eat / attack
+    float preyEnergyValue = 60.f;      // energy a predator gains from a herbivore
+    float predatorCatchChance = 0.6f;  // chance a reached attack succeeds
+    float predatorMissCooldown = 4.f;  // seconds a predator gives up after a miss
     // herbivores
     int initialHerbivores = 30;
     float herbivoreSpeed = 40.f;

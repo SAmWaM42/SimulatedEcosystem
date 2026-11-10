@@ -154,6 +154,7 @@ TEST_CASE("plants grow but never exceed the cap") {
     SimConfig cfg;
     cfg.initialHerbivores = 0;
     cfg.initialPredators = 0;
+    cfg.enableRescue = false;  // isolate plant growth from the demo safety net
     Simulation sim(cfg, 303);
     sim.populate();
 
@@ -188,6 +189,9 @@ TEST_CASE("animals stay inside the world") {
     cfg.sightUpkeep = 0.f;
     cfg.herbivoreMaxAge = 1.0e9f;
     cfg.predatorMaxAge = 1.0e9f;
+    cfg.enableRescue = false;  // keep this a pure movement-bound test
+    cfg.predatorPreyRefuge = 1000;  // disable hunting
+    cfg.mateEnergyThreshold = 2.f;  // disable reproduction
 
     Simulation sim(cfg, 404);
     sim.populate();
@@ -211,6 +215,10 @@ TEST_CASE("animals stay inside the world") {
 TEST_CASE("animals starve without plants") {
     SimConfig cfg;
     cfg.initialPlants = 0;
+    cfg.enableRescue = false;  // starvation must be allowed to empty the world
+    cfg.predatorUpkeepMultiplier = 1.f;  // use normal metabolic upkeep
+    cfg.predatorPreyRefuge = 1000;       // no hunting
+    cfg.mateEnergyThreshold = 2.f;       // no reproduction
     Simulation sim(cfg, 505);
     sim.populate();
 

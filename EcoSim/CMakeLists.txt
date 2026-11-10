@@ -43,6 +43,9 @@ add_library(eco_sim STATIC
     src/sim/SpatialGrid.cpp
     src/sim/Organism.cpp
     src/sim/Simulation.cpp
+    src/sim/Reproduction.cpp
+    src/sim/Lineage.cpp
+    src/sim/Stats.cpp
 )
 target_link_libraries(eco_sim PUBLIC eco_genetics glm::glm)
 target_include_directories(eco_sim PUBLIC src)
@@ -51,6 +54,11 @@ add_executable(sim_headless
     apps/sim_headless.cpp
 )
 target_link_libraries(sim_headless PRIVATE eco_sim)
+
+add_executable(balance_run
+    apps/balance_run.cpp
+)
+target_link_libraries(balance_run PRIVATE eco_sim)
 
 add_executable(genetics_tests
     tests/genetics_tests.cpp
@@ -67,7 +75,13 @@ add_executable(behaviour_tests
 )
 target_link_libraries(behaviour_tests PRIVATE eco_sim doctest::doctest)
 
+add_executable(reproduction_tests
+    tests/reproduction_tests.cpp
+)
+target_link_libraries(reproduction_tests PRIVATE eco_sim doctest::doctest)
+
 enable_testing()
 add_test(NAME genetics COMMAND genetics_tests)
 add_test(NAME sim COMMAND sim_tests)
 add_test(NAME behaviour COMMAND behaviour_tests)
+add_test(NAME reproduction COMMAND reproduction_tests)

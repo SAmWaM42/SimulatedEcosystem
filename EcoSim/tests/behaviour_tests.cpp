@@ -27,6 +27,8 @@ SimConfig baseConfig() {
     cfg.initialPredators = 0;
     cfg.plantSpawnMin = kNoPlantPropagation;
     cfg.plantSpawnMax = kNoPlantPropagation;
+    cfg.enableRescue = false;  // isolate behaviour from the demo safety net
+    cfg.predatorPreyRefuge = 0;  // allow predation tests with a single prey
     return cfg;
 }
 

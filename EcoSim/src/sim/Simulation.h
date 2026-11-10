@@ -8,9 +8,11 @@
 #include <vector>
 
 #include "core/Rng.h"
+#include "sim/Lineage.h"
 #include "sim/Organism.h"
 #include "sim/SimConfig.h"
 #include "sim/SpatialGrid.h"
+#include "sim/Stats.h"
 #include "sim/World.h"
 
 // Owns every organism and coordinates population updates, births, and death.
@@ -59,19 +61,42 @@ public:
     // Returns the cumulative number of removed organisms of a kind and cause.
     int deathCount(Kind kind, DeathCause cause) const;
 
+    // Returns the retained family tree and its mutation interface.
+    LineageTracker& lineage();
+    const LineageTracker& lineage() const;
+    // Returns the stats collector and its mutation interface.
+    StatsManager& stats();
+    const StatsManager& stats() const;
+
+    // Increments the cumulative reproduction birth counter (once per child).
+    void noteBirth();
+    // Cumulative number of offspring born through reproduction.
+    int birthCount() const;
+    // Cumulative number of rescue immigrants spawned.
+    int immigrantCount() const;
+
     // Moves all queued organisms into the main population immediately; tests
     // use this after addOrganism to make hand-built organisms visible.
     void flushPending();
 
 private:
+    // Spawns one immigrant for each animal kind below the rescue floor.
+    void spawnRescueImmigrants();
+
     SimConfig settings;
     Rng random;
     World worldData;
     SpatialGrid spatialGrid;
+    LineageTracker lineageTracker;
+    StatsManager statsManager;
     std::vector<std::unique_ptr<Organism>> population;
     std::vector<std::unique_ptr<Organism>> pending;
     std::unordered_map<uint32_t, Organism*> byId;  // rebuilt each step
     int deathCounts[3][4] = {};  // [Kind][DeathCause], cumulative
     uint32_t nextIdValue = 1;
     double simTime = 0.0;
+    double nextRescueTime = 0.0;
+    double nextStatsTime = 0.0;
+    int birthCounter = 0;
+    int immigrantCounter = 0;
 };

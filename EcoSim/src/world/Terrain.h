@@ -2,24 +2,25 @@
 // headless and reused by the renderer.
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <vector>
 
 #include <glm/vec3.hpp>
 
-// Tunables for the deterministic value-noise terrain.
+// Tunables for the deterministic gradient-noise terrain.
 struct TerrainConfig {
-    int resolution = 129;      // vertices per side
+    int resolution = 257;      // vertices per side
     float size = 3000.f;       // world units per side
     float maxHeight = 120.f;
     float waterFraction = 0.2f;  // share of the map under water
-    std::uint32_t seed = 1;
+    std::uint32_t seed = 20;
 };
 
 // Deterministic height field with bilinear sampling and a percentile water line.
 class Terrain {
 public:
-    // Generates the fBm height field and derives the water level.
+    // Generates the warped fBm/ridged height field and derives the water level.
     explicit Terrain(const TerrainConfig& terrainConfig);
     // Bilinear height between grid points; points outside the map are clamped.
     float heightAt(float x, float z) const;
@@ -37,14 +38,17 @@ public:
     float vertexHeight(int ix, int iz) const;
 
 private:
-    // Hash of an integer lattice point and the seed, in [0, 1].
-    float hash01(int x, int z) const;
-    // Smoothstep-interpolated value noise on the integer lattice.
-    float valueNoise(float x, float z) const;
-    // Four-octave fBm normalised to [0, 1] and scaled by maxHeight.
-    float generateHeight(float x, float z) const;
+    // Seeded 2D gradient (Perlin) noise in roughly [-1, 1].
+    float gradientNoise(float x, float z) const;
+    // Five-octave fBm normalised to roughly [-1, 1].
+    float fbm(float x, float z) const;
+    // Five-octave ridged noise normalised to [0, 1].
+    float ridged(float x, float z) const;
+    // Warped blend of fBm and ridged noise before global rescaling.
+    float generateRawHeight(float x, float z) const;
 
     TerrainConfig cfg;
+    std::array<int, 512> permutation{};
     std::vector<float> heights;  // row-major, iz * resolution + ix
     float waterLevelValue = 0.f;
 };

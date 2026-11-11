@@ -27,6 +27,9 @@ struct HudData {
     int predatorFemales = 0;
     int predatorMales = 0;
     int fps = 0;
+    int drawCalls = 0;
+    float simMs = 0.f;
+    float renderMs = 0.f;
     bool paused = false;
 };
 
@@ -44,3 +47,10 @@ void drawInspectorPanel(const Simulation& sim, std::uint32_t selectedId,
 
 // Draws the ImPlot statistics window with its tab bar.
 void drawStatisticsPanel(const Simulation& sim);
+
+// Draws the bounded family tree for the selected animal, if one is selected.
+void drawLineagePanel(const Simulation& sim, std::uint32_t selectedId,
+                      UiActions& actions);
+
+// Draws the Punnett square and mutation summary for the selected animal.
+void drawGeneticsPanel(const Simulation& sim, std::uint32_t selectedId);

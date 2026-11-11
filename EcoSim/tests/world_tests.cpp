@@ -4,6 +4,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -193,6 +194,36 @@ TEST_CASE("mesh factory produces valid outward-facing meshes") {
         CHECK(glm::length(vertex.position) ==
               doctest::Approx(0.5f).epsilon(1e-3));
     }
+}
+
+TEST_CASE("default terrain is varied and has no adjacent spikes") {
+    TerrainConfig cfg;
+    const Terrain terrain(cfg);
+
+    float minimum = terrain.vertexHeight(0, 0);
+    float maximum = minimum;
+    float maximumStep = 0.f;
+    for (int iz = 0; iz < cfg.resolution; ++iz) {
+        for (int ix = 0; ix < cfg.resolution; ++ix) {
+            const float height = terrain.vertexHeight(ix, iz);
+            minimum = std::min(minimum, height);
+            maximum = std::max(maximum, height);
+            if (ix > 0) {
+                maximumStep = std::max(
+                    maximumStep,
+                    std::fabs(height - terrain.vertexHeight(ix - 1, iz)));
+            }
+            if (iz > 0) {
+                maximumStep = std::max(
+                    maximumStep,
+                    std::fabs(height - terrain.vertexHeight(ix, iz - 1)));
+            }
+        }
+    }
+
+    INFO("max step ", maximumStep, " of ", cfg.maxHeight);
+    CHECK(maximum - minimum > 0.5f * cfg.maxHeight);
+    CHECK(maximumStep <= 0.12f * cfg.maxHeight);
 }
 
 TEST_CASE("orbit camera clamps distance, pitch, and target") {

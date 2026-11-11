@@ -1,20 +1,56 @@
-// Terrain generation and sampling: seeded value-noise fBm, bilinear heights,
-// central-difference normals, and a percentile-derived water line.
+// Terrain generation and sampling: seeded gradient-noise fBm with ridges and
+// domain warp, bilinear heights, central-difference normals, and a
+// percentile-derived water line.
 #include "world/Terrain.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
+#include <numeric>
 #include <vector>
 
 #include <glm/geometric.hpp>
 
+#include "core/Rng.h"
+
 namespace {
-// Four octaves, frequency 4 at octave 0, lacunarity 2, gain 0.5.
-constexpr int kOctaves = 4;
-constexpr float kBaseFrequency = 4.f;
+// Five octaves at base frequency 3.5, lacunarity 2, gain 0.5.
+constexpr int kOctaves = 5;
+constexpr float kBaseFrequency = 3.5f;
 constexpr float kLacunarity = 2.f;
 constexpr float kGain = 0.5f;
+constexpr float kRidgeWeight = 0.3f;
+constexpr float kWarpFrequency = 2.f;
+constexpr float kWarpStrength = 0.15f;
+constexpr float kInvSqrt2 = 0.70710678118f;
+
+// Perlin's quintic fade: 6t^5 - 15t^4 + 10t^3.
+float fade(float t) {
+    return t * t * t * (t * (t * 6.f - 15.f) + 10.f);
+}
+
+// One of eight unit gradient directions selected by a permutation hash.
+float gradientDot(int hash, float dx, float dz) {
+    switch (hash & 7) {
+    case 0:
+        return dx;
+    case 1:
+        return (dx + dz) * kInvSqrt2;
+    case 2:
+        return dz;
+    case 3:
+        return (-dx + dz) * kInvSqrt2;
+    case 4:
+        return -dx;
+    case 5:
+        return (-dx - dz) * kInvSqrt2;
+    case 6:
+        return -dz;
+    default:
+        return (dx - dz) * kInvSqrt2;
+    }
+}
 }  // namespace
 
 Terrain::Terrain(const TerrainConfig& terrainConfig) : cfg(terrainConfig) {
@@ -23,17 +59,52 @@ Terrain::Terrain(const TerrainConfig& terrainConfig) : cfg(terrainConfig) {
         static_cast<std::size_t>(cfg.resolution) * cfg.resolution;
     heights.resize(vertexCount);
 
+    // Fisher-Yates shuffle of 0..255 with the simulation's seeded RNG.
+    std::array<int, 256> table{};
+    std::iota(table.begin(), table.end(), 0);
+    Rng rng(cfg.seed);
+    for (int i = 255; i > 0; --i) {
+        const int j = rng.uniformInt(0, i);
+        std::swap(table[static_cast<std::size_t>(i)],
+                  table[static_cast<std::size_t>(j)]);
+    }
+    for (int i = 0; i < 512; ++i) {
+        permutation[static_cast<std::size_t>(i)] =
+            table[static_cast<std::size_t>(i & 255)];
+    }
+
     const float denominator =
         (cfg.resolution > 1) ? static_cast<float>(cfg.resolution - 1) : 1.f;
+    float minimum = 0.f;
+    float maximum = 0.f;
     for (int iz = 0; iz < cfg.resolution; ++iz) {
         for (int ix = 0; ix < cfg.resolution; ++ix) {
             const float x =
                 cfg.size * static_cast<float>(ix) / denominator;
             const float z =
                 cfg.size * static_cast<float>(iz) / denominator;
-            heights[static_cast<std::size_t>(iz) * cfg.resolution + ix] =
-                generateHeight(x, z);
+            const float raw = generateRawHeight(x, z);
+            heights[static_cast<std::size_t>(iz) * cfg.resolution + ix] = raw;
+            if (iz == 0 && ix == 0) {
+                minimum = raw;
+                maximum = raw;
+            } else {
+                minimum = std::min(minimum, raw);
+                maximum = std::max(maximum, raw);
+            }
         }
+    }
+
+    // Stretch the generated field to [0, 1], then bias it toward flat
+    // lowlands and sharper peaks before applying the requested height.
+    const float range = maximum - minimum;
+    if (range > 1e-6f) {
+        for (float& height : heights) {
+            const float normalized = (height - minimum) / range;
+            height = std::pow(normalized, 1.4f) * cfg.maxHeight;
+        }
+    } else {
+        std::fill(heights.begin(), heights.end(), 0.f);
     }
 
     // The water level is the height at the requested percentile, so the
@@ -112,46 +183,85 @@ float Terrain::vertexHeight(int ix, int iz) const {
     return heights[static_cast<std::size_t>(iz) * cfg.resolution + ix];
 }
 
-float Terrain::hash01(int x, int z) const {
-    std::uint32_t h = static_cast<std::uint32_t>(x) * 0x8da6b343u;
-    h ^= static_cast<std::uint32_t>(z) * 0xd8163841u;
-    h ^= cfg.seed * 0xcb1ab31fu;
-    h ^= h >> 13;
-    h *= 0x85ebca6bu;
-    h ^= h >> 16;
-    return static_cast<float>(h & 0x00ffffffu) / 16777216.f;
-}
-
-float Terrain::valueNoise(float x, float z) const {
+float Terrain::gradientNoise(float x, float z) const {
     const int ix = static_cast<int>(std::floor(x));
     const int iz = static_cast<int>(std::floor(z));
     const float fx = x - static_cast<float>(ix);
     const float fz = z - static_cast<float>(iz);
-    const float sx = fx * fx * (3.f - 2.f * fx);
-    const float sz = fz * fz * (3.f - 2.f * fz);
+    const int x0 = ix & 255;
+    const int z0 = iz & 255;
+    const int x1 = (ix + 1) & 255;
+    const int z1 = (iz + 1) & 255;
 
-    const float v00 = hash01(ix, iz);
-    const float v10 = hash01(ix + 1, iz);
-    const float v01 = hash01(ix, iz + 1);
-    const float v11 = hash01(ix + 1, iz + 1);
-    const float lower = v00 + (v10 - v00) * sx;
-    const float upper = v01 + (v11 - v01) * sx;
-    return lower + (upper - lower) * sz;
+    const auto dotAt = [&](int latticeX, int latticeZ, float dx,
+                           float dz) {
+        const int hash =
+            permutation[static_cast<std::size_t>(
+                permutation[static_cast<std::size_t>(latticeX)] +
+                latticeZ)] &
+            7;
+        return gradientDot(hash, dx, dz);
+    };
+
+    const float n00 = dotAt(x0, z0, fx, fz);
+    const float n10 = dotAt(x1, z0, fx - 1.f, fz);
+    const float n01 = dotAt(x0, z1, fx, fz - 1.f);
+    const float n11 = dotAt(x1, z1, fx - 1.f, fz - 1.f);
+
+    const float u = fade(fx);
+    const float v = fade(fz);
+    const float lower = n00 + (n10 - n00) * u;
+    const float upper = n01 + (n11 - n01) * u;
+    return lower + (upper - lower) * v;
 }
 
-float Terrain::generateHeight(float x, float z) const {
-    const float u = (cfg.size > 0.f) ? x / cfg.size : 0.f;
-    const float v = (cfg.size > 0.f) ? z / cfg.size : 0.f;
-
-    float frequency = kBaseFrequency;
+float Terrain::fbm(float x, float z) const {
+    float frequency = 1.f;
     float amplitude = 1.f;
     float sum = 0.f;
     float amplitudeSum = 0.f;
     for (int octave = 0; octave < kOctaves; ++octave) {
-        sum += amplitude * valueNoise(u * frequency, v * frequency);
+        sum += amplitude * gradientNoise(x * frequency, z * frequency);
         amplitudeSum += amplitude;
         frequency *= kLacunarity;
         amplitude *= kGain;
     }
-    return (sum / amplitudeSum) * cfg.maxHeight;
+    return sum / amplitudeSum;
+}
+
+float Terrain::ridged(float x, float z) const {
+    float frequency = 1.f;
+    float amplitude = 1.f;
+    float sum = 0.f;
+    float amplitudeSum = 0.f;
+    for (int octave = 0; octave < kOctaves; ++octave) {
+        const float noise = gradientNoise(x * frequency, z * frequency);
+        sum += amplitude * (1.f - std::fabs(noise));
+        amplitudeSum += amplitude;
+        frequency *= kLacunarity;
+        amplitude *= kGain;
+    }
+    return sum / amplitudeSum;
+}
+
+float Terrain::generateRawHeight(float x, float z) const {
+    const float u = (cfg.size > 0.f) ? x / cfg.size : 0.f;
+    const float v = (cfg.size > 0.f) ? z / cfg.size : 0.f;
+
+    // A low-frequency warp offsets both lookup axes by about 0.15 of a lattice
+    // cell, breaking up the grid-aligned look without displacing the terrain
+    // globally.
+    const float warpX =
+        gradientNoise(u * kWarpFrequency + 19.1f, v * kWarpFrequency - 7.7f);
+    const float warpZ =
+        gradientNoise(u * kWarpFrequency - 11.3f, v * kWarpFrequency + 5.9f);
+    const float sampleX =
+        u * kBaseFrequency + warpX * kWarpStrength;
+    const float sampleZ =
+        v * kBaseFrequency + warpZ * kWarpStrength;
+
+    const float fbmHeight = (fbm(sampleX, sampleZ) + 1.f) * 0.5f;
+    const float ridgeHeight = ridged(sampleX, sampleZ);
+    return (1.f - kRidgeWeight) * fbmHeight +
+           kRidgeWeight * ridgeHeight;
 }

@@ -22,13 +22,11 @@ int main(int argc, char** argv) {
     try {
         setExecutablePath(argv[0]);
 
-        std::uint32_t seed = 1;
-        if (argc > 1) {
-            seed = static_cast<std::uint32_t>(std::stoul(argv[1]));
-        }
-
         TerrainConfig terrainConfig;
-        terrainConfig.seed = seed;
+        if (argc > 1) {
+            terrainConfig.seed =
+                static_cast<std::uint32_t>(std::stoul(argv[1]));
+        }
         const Terrain terrain(terrainConfig);
 
         Window window(1280, 720, "EcoSim Viewer");
@@ -51,6 +49,8 @@ int main(int argc, char** argv) {
         Camera camera(terrain);
         const glm::vec3 lightDirection =
             glm::normalize(glm::vec3(-0.4f, -1.0f, -0.3f));
+        const glm::vec3 fogColour(0.53f, 0.81f, 0.92f);
+        constexpr float kFogDensity = 0.00012f;
 
         std::cout << "EcoSim viewer controls: left-drag orbit, right-drag pan, "
                      "wheel zoom, WASD move, shift faster, ESC quit"
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
             const InputState input = window.input();
             camera.update(input, deltaTime, terrain);
 
-            window.clear(0.53f, 0.81f, 0.92f);
+            window.clear(fogColour.r, fogColour.g, fogColour.b);
 
             const glm::mat4 view = camera.viewMatrix();
             const glm::mat4 projection =
@@ -82,9 +82,10 @@ int main(int argc, char** argv) {
             terrainShader.setMat4("uProj", projection);
             terrainShader.setMat3("uNormalMatrix", glm::mat3(1.f));
             terrainShader.setVec3("uLightDir", lightDirection);
+            terrainShader.setVec3("uCameraPos", cameraPosition);
             terrainShader.setFloat("uWaterLevel", terrain.waterLevel());
-            terrainShader.setFloat("uMaxHeight",
-                                   terrain.config().maxHeight);
+            terrainShader.setVec3("uFogColor", fogColour);
+            terrainShader.setFloat("uFogDensity", kFogDensity);
             terrainMesh.draw();
 
             const float centre = terrain.config().size * 0.5f;
@@ -104,6 +105,8 @@ int main(int argc, char** argv) {
             litShader.setMat4("uProj", projection);
             litShader.setVec3("uLightDir", lightDirection);
             litShader.setVec3("uCameraPos", cameraPosition);
+            litShader.setVec3("uFogColor", fogColour);
+            litShader.setFloat("uFogDensity", kFogDensity);
 
             for (int i = 0; i < 5; ++i) {
                 const float x = centre + static_cast<float>(i - 2) * 150.f;
@@ -139,6 +142,9 @@ int main(int argc, char** argv) {
                                 glm::inverseTranspose(glm::mat3(waterModel)));
             waterShader.setVec3("uLightDir", lightDirection);
             waterShader.setVec3("uCameraPos", cameraPosition);
+            waterShader.setFloat("uTime", static_cast<float>(now));
+            waterShader.setVec3("uFogColor", fogColour);
+            waterShader.setFloat("uFogDensity", kFogDensity);
             waterMesh.draw();
 
             window.endBlendPass();
@@ -163,4 +169,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

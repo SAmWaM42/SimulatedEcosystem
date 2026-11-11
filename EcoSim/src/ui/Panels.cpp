@@ -3,9 +3,11 @@
 #include "ui/Panels.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <imgui.h>
@@ -22,12 +24,56 @@
 #include "sim/Simulation.h"
 #include "sim/Stats.h"
 #include "ui/ChartData.h"
+#include "ui/LineageLayout.h"
+#include "ui/Punnett.h"
 #include "ui/UiText.h"
 
 namespace {
 constexpr float kPanelMargin = 16.f;
 constexpr float kControlsWidth = 370.f;
 constexpr float kInspectorTop = 340.f;
+constexpr float kLineageSpacing = 130.f;
+constexpr float kLineageRadius = 14.f;
+
+// Single-letter allele label used inside compact Punnett table cells.
+char alleleLetter(genetics::ColourAllele allele) {
+    switch (allele) {
+    case genetics::ColourAllele::Dark:
+        return 'D';
+    case genetics::ColourAllele::Medium:
+        return 'M';
+    case genetics::ColourAllele::Light:
+        return 'L';
+    }
+    return '?';
+}
+
+// Caption shown above each lineage column.
+const char* columnCaption(int column) {
+    switch (column) {
+    case 0:
+        return "Selected";
+    case 1:
+        return "Children";
+    case 2:
+        return "Grandchildren";
+    case -1:
+        return "Parents";
+    case -2:
+        return "Grandparents";
+    case -3:
+        return "Great-grandparents";
+    case -4:
+        return "Distant ancestors";
+    default:
+        return column < 0 ? "Ancestors" : "Descendants";
+    }
+}
+
+// Letter drawn inside a lineage node.
+const char* sexLetter(genetics::Sex sex) {
+    return sex == genetics::Sex::Female ? "F" : "M";
+}
 
 // Converts the renderer palette's linear-ish RGB to an ImGui colour.
 ImVec4 panelColour(const glm::vec3& colour) {
@@ -202,12 +248,14 @@ void drawHud(const HudData& hud) {
         ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - kPanelMargin,
                viewport->WorkPos.y + kPanelMargin),
         ImGuiCond_Always, ImVec2(1.f, 0.f));
+    // A fixed overlay size also renders correctly on the first hidden-window
+    // screenshot frame; auto-resize would need a second frame.
+    ImGui::SetNextWindowSize(ImVec2(260.f, 220.f), ImGuiCond_Always);
     ImGui::SetNextWindowBgAlpha(0.55f);
     const ImGuiWindowFlags flags =
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_AlwaysAutoResize;
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings;
 
     ImGui::Begin("##hud", nullptr, flags);
     ImGui::Text("Time  %s", formatClock(hud.time).c_str());
@@ -220,6 +268,9 @@ void drawHud(const HudData& hud) {
                 hud.predatorFemales + hud.predatorMales, hud.predatorFemales,
                 hud.predatorMales);
     ImGui::Text("FPS  %d", hud.fps);
+    ImGui::Text("Draw calls  %d", hud.drawCalls);
+    ImGui::Text("Sim  %.2f ms/frame", hud.simMs);
+    ImGui::Text("Render  %.2f ms/frame", hud.renderMs);
     if (hud.paused) {
         ImGui::TextColored(ImVec4(1.f, 0.85f, 0.30f, 1.f), "PAUSED");
     }
@@ -329,7 +380,7 @@ void drawInspectorPanel(const Simulation& sim, std::uint32_t selectedId,
 void drawStatisticsPanel(const Simulation& sim) {
     ImGui::SetNextWindowPos(ImVec2(400.f, kPanelMargin),
                             ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(620.f, 620.f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(600.f, 620.f), ImGuiCond_FirstUseEver);
     // Extra left padding leaves room for vertical ImPlot axis labels.
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16.f, 8.f));
     ImGui::Begin("Statistics");
@@ -347,14 +398,28 @@ void drawStatisticsPanel(const Simulation& sim) {
 
     const ChartSeries& series = cache.series;
     const int pointCount = static_cast<int>(series.time.size());
+    const double maxTime =
+        series.time.empty() ? 1.0 : std::max(1.0, series.time.back());
+    double maxAnimals = 0.0;
+    double maxPlants = 0.0;
+    for (std::size_t i = 0; i < series.time.size(); ++i) {
+        maxAnimals = std::max(
+            maxAnimals, std::max(series.herbivores[i],
+                                 series.predators[i]));
+        maxPlants = std::max(maxPlants, series.plants[i]);
+    }
+    maxAnimals = std::max(1.0, maxAnimals * 1.08);
+    maxPlants = std::max(1.0, maxPlants * 1.08);
 
     if (ImGui::BeginTabBar("StatisticsTabs")) {
         if (ImGui::BeginTabItem("Population")) {
             if (ImPlot::BeginPlot("Animal population",
                                   ImVec2(-1.f, 220.f))) {
-                ImPlot::SetupAxes("seconds", "count",
-                                  ImPlotAxisFlags_AutoFit,
-                                  ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxes("seconds", "count");
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, maxTime,
+                                        ImPlotCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, maxAnimals,
+                                        ImPlotCond_Always);
                 ImPlot::SetupLegend(ImPlotLocation_NorthWest);
                 if (pointCount > 0) {
                     ImPlot::PlotLine("Herbivores", series.time.data(),
@@ -366,9 +431,11 @@ void drawStatisticsPanel(const Simulation& sim) {
             }
             if (ImPlot::BeginPlot("Plant population",
                                   ImVec2(-1.f, 220.f))) {
-                ImPlot::SetupAxes("seconds", "count",
-                                  ImPlotAxisFlags_AutoFit,
-                                  ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxes("seconds", "count");
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, maxTime,
+                                        ImPlotCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, maxPlants,
+                                        ImPlotCond_Always);
                 ImPlot::SetupLegend(ImPlotLocation_NorthWest);
                 if (pointCount > 0) {
                     ImPlot::PlotLine("Plants", series.time.data(),
@@ -382,9 +449,11 @@ void drawStatisticsPanel(const Simulation& sim) {
         if (ImGui::BeginTabItem("Sight")) {
             if (ImPlot::BeginPlot("Mean sight over time",
                                   ImVec2(-1.f, 220.f))) {
-                ImPlot::SetupAxes("seconds", "sight",
-                                  ImPlotAxisFlags_AutoFit,
-                                  ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxes("seconds", "sight");
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, maxTime,
+                                        ImPlotCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 200.0, 400.0,
+                                        ImPlotCond_Always);
                 ImPlot::SetupLegend(ImPlotLocation_NorthWest);
                 if (pointCount > 0) {
                     ImPlot::PlotLine("Herbivores", series.time.data(),
@@ -430,8 +499,9 @@ void drawStatisticsPanel(const Simulation& sim) {
         if (ImGui::BeginTabItem("Colour gene")) {
             if (ImPlot::BeginPlot("Dark allele frequency",
                                   ImVec2(-1.f, 320.f))) {
-                ImPlot::SetupAxes("seconds", "frequency",
-                                  ImPlotAxisFlags_AutoFit, 0);
+                ImPlot::SetupAxes("seconds", "frequency");
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, maxTime,
+                                        ImPlotCond_Always);
                 ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1.0,
                                         ImPlotCond_Always);
                 ImPlot::SetupLegend(ImPlotLocation_NorthWest);
@@ -455,4 +525,282 @@ void drawStatisticsPanel(const Simulation& sim) {
 
     ImGui::End();
     ImGui::PopStyleVar();
+}
+
+void drawLineagePanel(const Simulation& sim, std::uint32_t selectedId,
+                      UiActions& actions) {
+    const Organism* selected = sim.find(selectedId);
+    if (selected == nullptr || selected->kind() == Kind::Plant) {
+        return;
+    }
+    const LineageRecord* centreRecord = sim.lineage().find(selectedId);
+    if (centreRecord == nullptr) {
+        return;
+    }
+
+    const LineageLayout layout = buildLineageLayout(sim.lineage(), selectedId);
+    if (layout.nodes.empty()) {
+        return;
+    }
+
+    ImGui::SetNextWindowPos(ImVec2(400.f, 340.f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(620.f, 350.f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Lineage");
+
+    int minColumn = layout.nodes.front().column;
+    int maxColumn = minColumn;
+    std::unordered_map<int, int> perColumn;
+    for (const LayoutNode& node : layout.nodes) {
+        minColumn = std::min(minColumn, node.column);
+        maxColumn = std::max(maxColumn, node.column);
+        ++perColumn[node.column];
+    }
+    int maxCount = 1;
+    for (const auto& entry : perColumn) {
+        maxCount = std::max(maxCount, entry.second);
+    }
+
+    const int columnCount = maxColumn - minColumn + 1;
+    const float canvasWidth = std::max(
+        ImGui::GetContentRegionAvail().x,
+        static_cast<float>(columnCount - 1) * kLineageSpacing + 160.f);
+    const float canvasHeight =
+        std::max(240.f, 84.f + 34.f * static_cast<float>(maxCount));
+
+    if (ImGui::BeginChild("##lineageCanvas", ImVec2(0.f, 0.f), true,
+                          ImGuiWindowFlags_HorizontalScrollbar)) {
+        const ImVec2 origin = ImGui::GetCursorScreenPos();
+        ImGui::Dummy(ImVec2(canvasWidth, canvasHeight));
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+        const float nodeTop = 50.f;
+        const float nodeBottom = canvasHeight - 28.f;
+        std::unordered_map<uint32_t, ImVec2> centres;
+
+        for (int column = minColumn; column <= maxColumn; ++column) {
+            const char* caption = columnCaption(column);
+            const ImVec2 captionSize = ImGui::CalcTextSize(caption);
+            const float centreX =
+                origin.x + 80.f +
+                static_cast<float>(column - minColumn) * kLineageSpacing;
+            drawList->AddText(
+                ImVec2(centreX - captionSize.x * 0.5f, origin.y + 8.f),
+                ImGui::GetColorU32(ImGuiCol_TextDisabled), caption);
+        }
+
+        for (const LayoutNode& node : layout.nodes) {
+            const float x =
+                origin.x + 80.f +
+                static_cast<float>(node.column - minColumn) * kLineageSpacing;
+            const float y =
+                origin.y + nodeTop + node.y * (nodeBottom - nodeTop);
+            centres.emplace(node.id, ImVec2(x, y));
+        }
+
+        for (const LayoutEdge& edge : layout.edges) {
+            const auto parent = centres.find(edge.parentId);
+            const auto child = centres.find(edge.childId);
+            if (parent != centres.end() && child != centres.end()) {
+                drawList->AddLine(parent->second, child->second,
+                                  IM_COL32(145, 145, 145, 190), 1.5f);
+            }
+        }
+
+        const ImVec2 mouse = ImGui::GetIO().MousePos;
+        const bool canvasHovered = ImGui::IsWindowHovered();
+        uint32_t hoveredId = 0;
+
+        for (const LayoutNode& node : layout.nodes) {
+            const LineageRecord* record = sim.lineage().find(node.id);
+            if (record == nullptr) {
+                continue;
+            }
+            const auto centreIt = centres.find(node.id);
+            if (centreIt == centres.end()) {
+                continue;
+            }
+            const ImVec2 centre = centreIt->second;
+            const bool alive = sim.find(node.id) != nullptr;
+            glm::vec3 fillColour = organismColour(
+                record->kind, genetics::colourOf(record->genome));
+            if (!alive) {
+                fillColour *= 0.45f;
+            }
+            const ImU32 fill = ImGui::ColorConvertFloat4ToU32(
+                ImVec4(fillColour.r, fillColour.g, fillColour.b, 1.f));
+            const ImU32 outline =
+                alive ? IM_COL32(245, 245, 245, 255)
+                      : IM_COL32(145, 145, 145, 255);
+
+            drawList->AddCircleFilled(centre, kLineageRadius, fill, 32);
+            drawList->AddCircle(centre, kLineageRadius, outline, 32, 2.f);
+            if (node.column == 0) {
+                drawList->AddCircle(centre, kLineageRadius + 5.f,
+                                    IM_COL32(255, 215, 0, 255), 32, 3.f);
+            }
+
+            const char* letter =
+                sexLetter(genetics::sexOf(record->genome));
+            const ImVec2 letterSize = ImGui::CalcTextSize(letter);
+            const float luminance = 0.2126f * fillColour.r +
+                                    0.7152f * fillColour.g +
+                                    0.0722f * fillColour.b;
+            const ImU32 letterColour =
+                luminance > 0.5f ? IM_COL32(20, 20, 20, 255)
+                                 : IM_COL32(255, 255, 255, 255);
+            drawList->AddText(
+                ImGui::GetFont(), ImGui::GetFontSize(),
+                ImVec2(centre.x - letterSize.x * 0.5f,
+                       centre.y - letterSize.y * 0.5f),
+                letterColour, letter);
+
+            const float dx = mouse.x - centre.x;
+            const float dy = mouse.y - centre.y;
+            const float hitRadius = kLineageRadius + 2.f;
+            if (canvasHovered && dx * dx + dy * dy <= hitRadius * hitRadius) {
+                hoveredId = node.id;
+            }
+        }
+
+        if (hoveredId != 0) {
+            const LineageRecord* record = sim.lineage().find(hoveredId);
+            if (record != nullptr && ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+                sim.find(hoveredId) != nullptr) {
+                actions.selectId = hoveredId;
+            }
+
+            if (record != nullptr) {
+                ImGui::BeginTooltip();
+                ImGui::Text("%s #%u", kindName(record->kind).c_str(),
+                            static_cast<unsigned int>(record->id));
+                ImGui::Text("Sex: %s   Generation: %d",
+                            sexName(genetics::sexOf(record->genome)),
+                            record->generation);
+                ImGui::Text("Sight: %.1f   Colour: %s",
+                            genetics::sightOf(record->genome),
+                            phenotypeName(genetics::colourOf(record->genome))
+                                .c_str());
+                ImGui::Text("Born: %.1f s", record->birthTime);
+                if (record->deathTime >= 0.0) {
+                    ImGui::Text("Died: %.1f s (%s)", record->deathTime,
+                                deathCauseName(record->deathCause).c_str());
+                } else {
+                    ImGui::TextUnformatted("alive");
+                }
+                ImGui::EndTooltip();
+            }
+        }
+
+        ImGui::EndChild();
+    }
+
+    ImGui::End();
+}
+
+void drawGeneticsPanel(const Simulation& sim, std::uint32_t selectedId) {
+    const Organism* selected = sim.find(selectedId);
+    if (selected == nullptr || selected->kind() == Kind::Plant) {
+        return;
+    }
+    const LineageRecord* child = sim.lineage().find(selectedId);
+    if (child == nullptr) {
+        return;
+    }
+
+    ImGui::SetNextWindowPos(ImVec2(1030.f, 260.f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(234.f, 390.f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Genetics of this animal");
+
+    if (child->motherId == 0 && child->fatherId == 0) {
+        ImGui::TextWrapped("Founder: no recorded parents");
+        ImGui::End();
+        return;
+    }
+
+    const LineageRecord* mother = sim.lineage().find(child->motherId);
+    const LineageRecord* father = sim.lineage().find(child->fatherId);
+    const PunnettInfo info = buildPunnett(child, mother, father);
+    if (!info.available) {
+        ImGui::TextWrapped("Parent records unavailable.");
+        ImGui::End();
+        return;
+    }
+
+    ImGui::TextWrapped("Mother alleles (rows) x father alleles (columns).");
+    const ImGuiTableFlags tableFlags =
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_SizingStretchSame;
+    if (ImGui::BeginTable("##punnett", 3, tableFlags)) {
+        ImGui::TableSetupColumn("##corner");
+        ImGui::TableSetupColumn("##father0");
+        ImGui::TableSetupColumn("##father1");
+
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted("M / F");
+        for (int column = 0; column < 2; ++column) {
+            ImGui::TableSetColumnIndex(column + 1);
+            ImGui::TextUnformatted(
+                alleleName(father->genome.colour[column]).c_str());
+        }
+
+        for (int row = 0; row < 2; ++row) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(
+                alleleName(mother->genome.colour[row]).c_str());
+            for (int column = 0; column < 2; ++column) {
+                ImGui::TableSetColumnIndex(column + 1);
+                const PunnettCell& cell = info.cells[row][column];
+                if (cell.isChild) {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg,
+                                           IM_COL32(62, 125, 72, 170));
+                }
+                ImGui::PushID(row * 2 + column);
+                ImGui::ColorButton(
+                    "##phenotype",
+                    panelColour(organismColour(child->kind, cell.phenotype)),
+                    ImGuiColorEditFlags_NoTooltip, ImVec2(16.f, 16.f));
+                ImGui::SameLine(0.f, 4.f);
+                ImGui::Text("%c/%c", alleleLetter(cell.fromMother),
+                            alleleLetter(cell.fromFather));
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+    }
+    ImGui::TextDisabled("D=Dark  M=Medium  L=Light");
+
+    char sightLine[512];
+    std::snprintf(
+        sightLine, sizeof(sightLine),
+        "Sight: mother (%.1f|%.1f) x father (%.1f|%.1f) -> "
+        "child (%.1f|%.1f), expressed %.1f",
+        mother->genome.sight[0], mother->genome.sight[1],
+        father->genome.sight[0], father->genome.sight[1],
+        child->genome.sight[0], child->genome.sight[1],
+        genetics::sightOf(child->genome));
+    ImGui::TextWrapped("%s", sightLine);
+
+    const ImVec4 warning(1.f, 0.78f, 0.25f, 1.f);
+    ImGui::PushStyleColor(ImGuiCol_Text, warning);
+    if (info.sightMutationMother) {
+        ImGui::TextWrapped(
+            "Mutation detected in the maternal sight allele");
+    }
+    if (info.sightMutationFather) {
+        ImGui::TextWrapped(
+            "Mutation detected in the paternal sight allele");
+    }
+    if (info.colourMutationMother) {
+        ImGui::TextWrapped(
+            "Mutation detected in the maternal colour allele");
+    }
+    if (info.colourMutationFather) {
+        ImGui::TextWrapped(
+            "Mutation detected in the paternal colour allele");
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::End();
 }

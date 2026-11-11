@@ -77,10 +77,19 @@ add_library(eco_view STATIC
     src/render/Picking.cpp
     src/ui/UiText.cpp
     src/ui/ChartData.cpp
+    src/ui/LineageLayout.cpp
+    src/ui/Punnett.cpp
 )
 target_link_libraries(eco_view PUBLIC eco_sim eco_world)
 target_include_directories(eco_view PUBLIC src)
 ecosim_enable_warnings(eco_view)
+
+# GL-free tooling used by screenshots and tests.
+add_library(eco_tools STATIC
+    src/tools/PngWriter.cpp
+)
+target_include_directories(eco_tools PUBLIC src)
+ecosim_enable_warnings(eco_tools)
 
 add_executable(sim_headless
     apps/sim_headless.cpp
@@ -135,6 +144,12 @@ add_executable(ui_tests
 )
 target_link_libraries(ui_tests PRIVATE eco_view doctest::doctest)
 ecosim_enable_warnings(ui_tests)
+
+add_executable(png_tests
+    tests/png_tests.cpp
+)
+target_link_libraries(png_tests PRIVATE eco_tools doctest::doctest)
+ecosim_enable_warnings(png_tests)
 
 if(ECOSIM_BUILD_VIEWER)
     enable_language(C)
@@ -222,7 +237,7 @@ ecosim_enable_warnings(ecosim_viewer)
     add_executable(ecosim
         apps/ecosim.cpp
     )
-    target_link_libraries(ecosim PRIVATE eco_render eco_ui)
+    target_link_libraries(ecosim PRIVATE eco_render eco_ui eco_tools)
     ecosim_enable_warnings(ecosim)
 
     add_custom_command(TARGET ecosim POST_BUILD
@@ -240,6 +255,9 @@ add_test(NAME reproduction COMMAND reproduction_tests)
 add_test(NAME world COMMAND world_tests)
 add_test(NAME view COMMAND view_tests)
 add_test(NAME ui COMMAND ui_tests)
+add_test(NAME png COMMAND png_tests)
+add_test(NAME balance_smoke COMMAND balance_run 2 300 1)
+set_tests_properties(balance_smoke PROPERTIES TIMEOUT 300)
 
 
 

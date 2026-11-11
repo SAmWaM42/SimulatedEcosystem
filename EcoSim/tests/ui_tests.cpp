@@ -1,19 +1,27 @@
-// Headless tests for Split 7 UI support: enum display names, clock formatting,
-// live-tunable copying, and chart-series preparation.
+// Headless tests for UI support: enum display names, clock formatting,
+// live-tunable copying, chart preparation, lineage layout, and Punnett data.
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <glm/vec2.hpp>
+
+#include "core/Rng.h"
+#include "sim/Lineage.h"
 #include "sim/Organism.h"
 #include "sim/SimConfig.h"
 #include "sim/Simulation.h"
 #include "sim/Stats.h"
 #include "ui/ChartData.h"
+#include "ui/LineageLayout.h"
+#include "ui/Punnett.h"
 #include "ui/UiText.h"
 
 namespace {
@@ -255,4 +263,133 @@ TEST_CASE("chart data mirrors stats samples and living sights") {
         CHECK(sight <= 400.f);
     }
     CHECK(livingSights(sim, Kind::Plant).empty());
+}
+
+TEST_CASE("lineage layout places parents, centre, and child") {
+    SimConfig cfg;
+    Rng rng(3);
+    LineageTracker tracker;
+    const auto record = [&](uint32_t id, uint32_t motherId,
+                            uint32_t fatherId, int generation, double time,
+                            genetics::Sex sex) {
+        const genetics::Genome genome =
+            genetics::randomGenome(sex, cfg.genetics, rng);
+        Herbivore animal(id, glm::vec2(0.f), genome, cfg.herbivoreSpeed,
+                         cfg.herbivoreMaxAge, cfg, rng);
+        animal.motherId = motherId;
+        animal.fatherId = fatherId;
+        animal.generation = generation;
+        tracker.recordBirth(animal, time);
+    };
+
+    record(1, 0, 0, 0, 0.0, genetics::Sex::Female);
+    record(2, 0, 0, 0, 0.0, genetics::Sex::Male);
+    record(3, 1, 2, 1, 10.0, genetics::Sex::Female);
+    record(4, 3, 0, 2, 20.0, genetics::Sex::Female);
+
+    const LineageLayout layout = buildLineageLayout(tracker, 3);
+    const auto findNode = [&](uint32_t id) -> const LayoutNode* {
+        const auto node = std::find_if(
+            layout.nodes.begin(), layout.nodes.end(),
+            [id](const LayoutNode& candidate) { return candidate.id == id; });
+        return node == layout.nodes.end() ? nullptr : &*node;
+    };
+    const auto hasEdge = [&](uint32_t parentId, uint32_t childId) {
+        return std::any_of(
+            layout.edges.begin(), layout.edges.end(),
+            [&](const LayoutEdge& edge) {
+                return edge.parentId == parentId && edge.childId == childId;
+            });
+    };
+
+    REQUIRE(findNode(3) != nullptr);
+    CHECK(findNode(3)->column == 0);
+    REQUIRE(findNode(1) != nullptr);
+    CHECK(findNode(1)->column == -1);
+    REQUIRE(findNode(2) != nullptr);
+    CHECK(findNode(2)->column == -1);
+    REQUIRE(findNode(4) != nullptr);
+    CHECK(findNode(4)->column == 1);
+    CHECK(layout.edges.size() == 3);
+    CHECK(hasEdge(1, 3));
+    CHECK(hasEdge(2, 3));
+    CHECK(hasEdge(3, 4));
+
+    std::map<int, std::set<float>> columnYs;
+    for (const LayoutNode& node : layout.nodes) {
+        CHECK(node.y > 0.f);
+        CHECK(node.y < 1.f);
+        CHECK(columnYs[node.column].insert(node.y).second);
+    }
+
+    const LineageLayout bounded = buildLineageLayout(tracker, 3, 4, 2, 2);
+    CHECK(bounded.nodes.size() <= 2);
+    CHECK(std::any_of(
+        bounded.nodes.begin(), bounded.nodes.end(),
+        [](const LayoutNode& node) { return node.column == 0; }));
+
+    const LineageLayout unknown = buildLineageLayout(tracker, 999);
+    CHECK(unknown.nodes.empty());
+    CHECK(unknown.edges.empty());
+}
+
+TEST_CASE("Punnett square combines alleles and detects mutations") {
+    LineageRecord mother{};
+    mother.id = 1;
+    mother.kind = Kind::Herbivore;
+    mother.genome.sight = {300.f, 320.f};
+    mother.genome.colour = {genetics::ColourAllele::Dark,
+                            genetics::ColourAllele::Light};
+    mother.genome.sexChromosomes = {genetics::SexChromosome::X,
+                                    genetics::SexChromosome::X};
+
+    LineageRecord father{};
+    father.id = 2;
+    father.kind = Kind::Herbivore;
+    father.genome.sight = {280.f, 340.f};
+    father.genome.colour = {genetics::ColourAllele::Dark,
+                            genetics::ColourAllele::Light};
+    father.genome.sexChromosomes = {genetics::SexChromosome::X,
+                                    genetics::SexChromosome::Y};
+
+    LineageRecord child{};
+    child.id = 3;
+    child.kind = Kind::Herbivore;
+    child.genome.sight = {300.f, 340.f};
+    child.genome.colour = {genetics::ColourAllele::Light,
+                           genetics::ColourAllele::Light};
+    child.genome.sexChromosomes = {genetics::SexChromosome::X,
+                                   genetics::SexChromosome::X};
+
+    const PunnettInfo info = buildPunnett(&child, &mother, &father);
+    REQUIRE(info.available);
+    CHECK(info.cells[0][0].phenotype == genetics::ColourPhenotype::Dark);
+    CHECK(info.cells[0][1].phenotype == genetics::ColourPhenotype::Dark);
+    CHECK(info.cells[1][0].phenotype == genetics::ColourPhenotype::Dark);
+    CHECK(info.cells[1][1].phenotype == genetics::ColourPhenotype::Light);
+    CHECK_FALSE(info.cells[0][0].isChild);
+    CHECK_FALSE(info.cells[0][1].isChild);
+    CHECK_FALSE(info.cells[1][0].isChild);
+    CHECK(info.cells[1][1].isChild);
+    CHECK_FALSE(info.sightMutationMother);
+    CHECK_FALSE(info.sightMutationFather);
+    CHECK_FALSE(info.colourMutationMother);
+    CHECK_FALSE(info.colourMutationFather);
+
+    LineageRecord sightMutant = child;
+    sightMutant.genome.sight[0] = 311.f;
+    sightMutant.genome.sight[1] = 341.f;
+    const PunnettInfo sightInfo = buildPunnett(&sightMutant, &mother, &father);
+    CHECK(sightInfo.sightMutationMother);
+    CHECK(sightInfo.sightMutationFather);
+
+    LineageRecord colourMutant = child;
+    colourMutant.genome.colour[0] = genetics::ColourAllele::Medium;
+    colourMutant.genome.colour[1] = genetics::ColourAllele::Medium;
+    const PunnettInfo colourInfo =
+        buildPunnett(&colourMutant, &mother, &father);
+    CHECK(colourInfo.colourMutationMother);
+    CHECK(colourInfo.colourMutationFather);
+
+    CHECK_FALSE(buildPunnett(nullptr, &mother, &father).available);
 }

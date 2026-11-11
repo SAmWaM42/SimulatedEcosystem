@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
                 "plants", "herbSightStart", "herbSightEnd", "births",
                 "immigrants", "status");
 
+    bool allOk = true;
     for (int seed = 1; seed <= seeds; ++seed) {
         SimConfig cfg;
         cfg.enableRescue = rescue;
@@ -56,6 +57,7 @@ int main(int argc, char** argv) {
         const int finalHerbivores = sim.count(Kind::Herbivore);
         const int finalPredators = sim.count(Kind::Predator);
         const bool ok = finalHerbivores > 0 && finalPredators > 0;
+        allOk = allOk && ok;
 
         std::printf("%4d %8d %9d %8d %9d %12d %15.2f %13.2f %8d %11d %s\n",
                     seed, minHerbivores, finalHerbivores, minPredators,
@@ -64,5 +66,5 @@ int main(int argc, char** argv) {
                     sim.immigrantCount(), ok ? "OK" : "EXTINCT");
     }
 
-    return 0;
+    return allOk ? 0 : 1;
 }

@@ -1,14 +1,17 @@
-// Small value type for the flat square simulation world; clamps positions and
-// centralises the containment checks used by organisms and the spatial grid.
+﻿// Small value type for the flat square simulation world; clamps positions and
+// centralises containment and terrain-walkability checks for organisms.
 #pragma once
 
 #include <algorithm>
 
 #include <glm/vec2.hpp>
 
+#include "world/Terrain.h"
+
 // Square world in the x/z plane, with x stored in vec2.x and z in vec2.y.
 struct World {
     float size;
+    const Terrain* terrain = nullptr;  // optional; null means all ground is walkable
 
     // Returns true when the point is inside the world, edges included.
     bool inside(glm::vec2 p) const {
@@ -25,8 +28,8 @@ struct World {
         return {size * 0.5f, size * 0.5f};
     }
 
-    // Hook for a later renderer's terrain/water; always walkable in this split.
-    bool isWalkable(glm::vec2) const {
-        return true;
+    // Animals treat water as a wall; with no terrain everything is walkable.
+    bool isWalkable(glm::vec2 p) const {
+        return terrain == nullptr || !terrain->isWater(p.x, p.y);
     }
 };

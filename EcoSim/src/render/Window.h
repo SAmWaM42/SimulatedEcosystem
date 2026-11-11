@@ -1,8 +1,9 @@
-// GLFW window, context, and input wrapper. Its interface keeps GLFW types
+﻿// GLFW window, context, and input wrapper. Its interface keeps GLFW types
 // opaque so only the viewer's Window implementation depends on GL headers.
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "render/Input.h"
 
@@ -48,6 +49,8 @@ public:
     double time() const;
     // Raw GLFW handle for Dear ImGui integration in later splits.
     GLFWwindow* handle() const;
+    // True only on the frame the key transitioned from up to down.
+    bool keyPressed(int glfwKey) const;
 
 private:
     static void framebufferSizeCallback(GLFWwindow* window, int width,
@@ -62,4 +65,11 @@ private:
     double lastMouseX = 0.0;
     double lastMouseY = 0.0;
     double scrollAccumulator = 0.0;
+    std::vector<unsigned char> previousKeys;
+    std::vector<unsigned char> currentKeys;
+    bool leftMouseDown = false;
+    bool clickCandidate = false;
+    double clickStartX = 0.0;
+    double clickStartY = 0.0;
 };
+

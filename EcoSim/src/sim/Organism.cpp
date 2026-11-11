@@ -1,4 +1,4 @@
-// Implementations of the organism hierarchy: plant propagation, animal upkeep,
+﻿// Implementations of the organism hierarchy: plant propagation, animal upkeep,
 // sight-based perception, the behaviour state machine, eating, and movement.
 #include "sim/Organism.h"
 
@@ -22,7 +22,11 @@ constexpr float kBoundaryJitter = 0.3f;
 }  // namespace
 
 Organism::Organism(uint32_t organismId, glm::vec2 startPosition)
-    : id(organismId), position(startPosition) {}
+    : id(organismId), position(startPosition), prevPosition(startPosition) {}
+
+void Organism::savePrevious() {
+    prevPosition = position;
+}
 
 Plant::Plant(uint32_t organismId, glm::vec2 startPosition, const SimConfig& cfg,
              Rng& rng)
@@ -38,6 +42,7 @@ void Plant::update(float dt, Simulation& sim) {
         return;
     }
 
+    age += dt;
     spawnTimer -= dt;
     if (spawnTimer > 0.f) {
         return;
@@ -51,6 +56,7 @@ void Plant::update(float dt, Simulation& sim) {
         position + glm::vec2(std::cos(angle), std::sin(angle)) * distance;
 
     if (sim.world().inside(candidate) &&
+        sim.world().isWalkable(candidate) &&
         sim.count(Kind::Plant) < cfg.maxPlants) {
         std::vector<Organism*> neighbours;
         sim.grid().queryRadius(candidate, cfg.plantCrowdRadius, neighbours);
@@ -83,12 +89,18 @@ Animal::Animal(uint32_t organismId, glm::vec2 startPosition,
       speed(movementSpeed),
       maxAge(lifeSpan),
       heading(rng.uniform(0.f, 2.f * kPi)),
+      prevHeading(heading),
       senseTimer(rng.uniform(0.f, cfg.senseInterval)),
       cooldown(0.f),
       wanderTimer(rng.uniform(cfg.wanderTurnMin, cfg.wanderTurnMax)),
       energyCap(cfg.maxEnergy),
       configPtr(&cfg),
       rngPtr(&rng) {}
+
+void Animal::savePrevious() {
+    Organism::savePrevious();
+    prevHeading = heading;
+}
 
 void Animal::update(float dt, Simulation& sim) {
     if (!alive) {
@@ -124,8 +136,19 @@ void Animal::update(float dt, Simulation& sim) {
 
     think(dt, sim);
 
-    position += glm::vec2(std::cos(heading), std::sin(heading)) * speed * dt;
-    position = sim.world().clamp(position);
+    const glm::vec2 next =
+        position + glm::vec2(std::cos(heading), std::sin(heading)) * speed * dt;
+    if (!sim.world().isWalkable(next)) {
+        // Animals treat water as a wall: turn around, drop targets, and re-roll
+        // the wander timer instead of entering the blocked cell.
+        heading += kPi + sim.rng().uniform(-0.5f, 0.5f);
+        foodId = 0;
+        mateId = 0;
+        wanderTimer = sim.rng().uniform(cfg.wanderTurnMin, cfg.wanderTurnMax);
+    } else {
+        position = next;
+        position = sim.world().clamp(position);
+    }
 }
 
 State Animal::state() const {
@@ -344,6 +367,9 @@ void Animal::giveBirth(Simulation& sim) {
         glm::vec2 childPosition =
             position + glm::vec2(std::cos(angle), std::sin(angle)) * distance;
         childPosition = sim.world().clamp(childPosition);
+        if (!sim.world().isWalkable(childPosition)) {
+            childPosition = position;
+        }
 
         std::unique_ptr<Animal> child =
             makeChild(sim.nextId(), childPosition, embryoGenome);
@@ -442,3 +468,4 @@ float Predator::perceptionRange() const {
 bool Predator::mayHunt(Simulation& sim) const {
     return sim.count(Kind::Herbivore) > configPtr->predatorPreyRefuge;
 }
+

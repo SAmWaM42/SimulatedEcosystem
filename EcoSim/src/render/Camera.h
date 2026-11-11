@@ -1,4 +1,4 @@
-// GL-free orbit camera for the EcoSim viewer; input is supplied as a plain
+﻿// GL-free orbit camera for the EcoSim viewer; input is supplied as a plain
 // snapshot so the camera can be unit-tested without GLFW.
 #pragma once
 
@@ -8,6 +8,12 @@
 #include "render/Input.h"
 
 class Terrain;
+
+// Pick ray with a unit direction.
+struct Ray {
+    glm::vec3 origin;
+    glm::vec3 direction;
+};
 
 // Orbit camera with terrain-aware target and eye constraints.
 class Camera {
@@ -29,6 +35,10 @@ public:
     float yaw() const;
     // Replaces the orbit target, e.g. to follow an organism later.
     void setTarget(const glm::vec3& t);
+    // Unprojects a pixel (origin top-left) into a world-space pick ray.
+    Ray screenRay(glm::vec2 pixel, int width, int height) const;
+    // Smoothly moves the ground target towards a followed x/z position.
+    void followTarget(glm::vec2 xz, float dt);
 
 private:
     glm::vec3 orbitTarget;
@@ -36,3 +46,4 @@ private:
     float orbitPitch;
     float orbitDistance;
 };
+

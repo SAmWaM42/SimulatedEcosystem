@@ -22,19 +22,30 @@ glm::vec2 randomJitter(Rng& rng, float radius) {
 }
 }  // namespace
 
-Simulation::Simulation(const SimConfig& cfg, uint32_t seed)
+Simulation::Simulation(const SimConfig& cfg, uint32_t seed,
+                       const Terrain* terrain)
     : settings(cfg),
       random(seed),
-      worldData{cfg.worldSize},
+      worldData{cfg.worldSize, terrain},
       spatialGrid(cfg.worldSize, cfg.spatialCellSize) {
     nextRescueTime = static_cast<double>(settings.rescueInterval);
     nextStatsTime = static_cast<double>(settings.statsInterval);
 }
 
+glm::vec2 Simulation::randomWalkablePosition() {
+    for (int attempt = 0; attempt < 200; ++attempt) {
+        const glm::vec2 candidate = randomPosition(worldData, random);
+        if (worldData.isWalkable(candidate)) {
+            return candidate;
+        }
+    }
+    return worldData.centre();
+}
+
 void Simulation::populate() {
     for (int i = 0; i < settings.initialPlants; ++i) {
         addOrganism(std::make_unique<Plant>(nextId(),
-                                            randomPosition(worldData, random),
+                                            randomWalkablePosition(),
                                             settings, random));
     }
 
@@ -44,7 +55,7 @@ void Simulation::populate() {
     for (int i = 0; i < settings.initialHerbivores; ++i) {
         const genetics::Sex sex =
             (i % 2 == 0) ? genetics::Sex::Female : genetics::Sex::Male;
-        const glm::vec2 position = randomPosition(worldData, random);
+        const glm::vec2 position = randomWalkablePosition();
         herbivorePositions.push_back(position);
         const genetics::Genome genome =
             genetics::randomGenome(sex, settings.genetics, random);
@@ -71,22 +82,27 @@ void Simulation::populate() {
 
     constexpr float kPredatorPairRadius = 4.f;
     for (int pair = 0; pair * 2 + 1 < settings.initialPredators; ++pair) {
-        glm::vec2 pairCentre = randomPosition(worldData, random);
+        glm::vec2 pairCentre = randomWalkablePosition();
         if (!herbivorePositions.empty()) {
             const int index = random.uniformInt(
                 0, static_cast<int>(herbivorePositions.size()) - 1);
             pairCentre = herbivorePositions[static_cast<std::size_t>(index)];
         }
+        const auto pairPosition = [&](glm::vec2 desired) {
+            desired = worldData.clamp(desired);
+            return worldData.isWalkable(desired) ? desired : pairCentre;
+        };
         createPredator(
-            worldData.clamp(pairCentre + randomJitter(random, kPredatorPairRadius)),
+            pairPosition(pairCentre +
+                         randomJitter(random, kPredatorPairRadius)),
             genetics::Sex::Female);
         createPredator(
-            worldData.clamp(pairCentre + randomJitter(random, kPredatorPairRadius)),
+            pairPosition(pairCentre +
+                         randomJitter(random, kPredatorPairRadius)),
             genetics::Sex::Male);
     }
     if (settings.initialPredators % 2 != 0) {
-        createPredator(randomPosition(worldData, random),
-                       genetics::Sex::Female);
+        createPredator(randomWalkablePosition(), genetics::Sex::Female);
     }
 
     flushPending();
@@ -95,6 +111,13 @@ void Simulation::populate() {
 }
 
 void Simulation::step() {
+    // Snapshot render interpolation state before any organism acts.
+    for (const std::unique_ptr<Organism>& organism : population) {
+        if (organism->alive) {
+            organism->savePrevious();
+        }
+    }
+
     spatialGrid.clear();
     byId.clear();
     for (const std::unique_ptr<Organism>& organism : population) {
@@ -163,6 +186,10 @@ uint32_t Simulation::nextId() {
 }
 
 const SimConfig& Simulation::config() const {
+    return settings;
+}
+
+SimConfig& Simulation::tunables() {
     return settings;
 }
 
@@ -313,7 +340,7 @@ void Simulation::spawnRescueImmigrants() {
 
         const genetics::Sex sex =
             (females <= males) ? genetics::Sex::Female : genetics::Sex::Male;
-        const glm::vec2 position = randomPosition(worldData, random);
+        const glm::vec2 position = randomWalkablePosition();
         const genetics::Genome genome =
             genetics::randomGenome(sex, settings.genetics, random);
 

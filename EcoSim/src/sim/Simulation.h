@@ -1,4 +1,4 @@
-// Simulation manager: owns the population, the shared RNG, the world, and the
+﻿// Simulation manager: owns the population, the shared RNG, the world, and the
 // spatial grid, and advances all organisms one fixed timestep at a time.
 #pragma once
 
@@ -6,6 +6,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include <glm/vec2.hpp>
 
 #include "core/Rng.h"
 #include "sim/Lineage.h"
@@ -19,12 +21,14 @@
 class Simulation {
 public:
     // Builds a simulation with the given settings and deterministic RNG seed.
-    Simulation(const SimConfig& cfg, uint32_t seed);
+    Simulation(const SimConfig& cfg, uint32_t seed,
+               const Terrain* terrain = nullptr);
 
-    // Creates the configured founder plants and animals at random positions.
+    // Creates the configured founder plants and animals at walkable positions.
     void populate();
 
     // Advances the whole simulation by exactly cfg.fixedDt seconds.
+    // Saves interpolation state for every living organism before updates.
     void step();
 
     // Queues an organism; it joins the main population at the end of the step.
@@ -35,6 +39,8 @@ public:
 
     // Returns the immutable settings shared by every organism.
     const SimConfig& config() const;
+    // Returns the mutable settings so the UI can apply live tunables.
+    SimConfig& tunables();
     // Returns the shared RNG so behaviour and tests draw from one stream.
     Rng& rng();
     // Returns the world used for containment and clamping.
@@ -43,6 +49,9 @@ public:
     SpatialGrid& grid();
     // Returns the simulated time in seconds.
     double time() const;
+    // Returns a random point inside the world that is not water; retries 200
+    // times, then falls back to the world centre.
+    glm::vec2 randomWalkablePosition();
     // Returns the current population, excluding organisms still queued.
     const std::vector<std::unique_ptr<Organism>>& organisms() const;
 
@@ -100,3 +109,4 @@ private:
     int birthCounter = 0;
     int immigrantCounter = 0;
 };
+

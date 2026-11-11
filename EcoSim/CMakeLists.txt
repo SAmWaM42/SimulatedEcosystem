@@ -65,10 +65,22 @@ add_library(eco_sim STATIC
     src/sim/Reproduction.cpp
     src/sim/Lineage.cpp
     src/sim/Stats.cpp
+    src/sim/SimClock.cpp
 )
-target_link_libraries(eco_sim PUBLIC eco_genetics glm::glm)
+target_link_libraries(eco_sim PUBLIC eco_genetics glm::glm eco_world)
 target_include_directories(eco_sim PUBLIC src)
 ecosim_enable_warnings(eco_sim)
+
+# GL-free picking and UI text/chart preparation are shared by the viewer, the
+# main app, tests, and the ImGui panels.
+add_library(eco_view STATIC
+    src/render/Picking.cpp
+    src/ui/UiText.cpp
+    src/ui/ChartData.cpp
+)
+target_link_libraries(eco_view PUBLIC eco_sim eco_world)
+target_include_directories(eco_view PUBLIC src)
+ecosim_enable_warnings(eco_view)
 
 add_executable(sim_headless
     apps/sim_headless.cpp
@@ -112,6 +124,18 @@ add_executable(world_tests
 target_link_libraries(world_tests PRIVATE eco_world doctest::doctest)
 ecosim_enable_warnings(world_tests)
 
+add_executable(view_tests
+    tests/view_tests.cpp
+)
+target_link_libraries(view_tests PRIVATE eco_view eco_sim eco_world doctest::doctest)
+ecosim_enable_warnings(view_tests)
+
+add_executable(ui_tests
+    tests/ui_tests.cpp
+)
+target_link_libraries(ui_tests PRIVATE eco_view doctest::doctest)
+ecosim_enable_warnings(ui_tests)
+
 if(ECOSIM_BUILD_VIEWER)
     enable_language(C)
 
@@ -123,6 +147,40 @@ if(ECOSIM_BUILD_VIEWER)
         GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.4)
     FetchContent_MakeAvailable(glfw)
+
+    FetchContent_Declare(imgui
+        GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG v1.90.9)
+    FetchContent_Declare(implot
+        GIT_REPOSITORY https://github.com/epezent/implot.git
+        GIT_TAG v0.16)
+    FetchContent_MakeAvailable(imgui implot)
+
+    # Neither dependency ships a usable CMake project, so define the libraries
+    # here without applying EcoSim's warning policy to third-party code.
+    add_library(imgui STATIC
+        ${imgui_SOURCE_DIR}/imgui.cpp
+        ${imgui_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+    )
+    target_include_directories(imgui PUBLIC
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
+    )
+    target_link_libraries(imgui PUBLIC glfw)
+    if(CMAKE_DL_LIBS)
+        target_link_libraries(imgui PUBLIC ${CMAKE_DL_LIBS})
+    endif()
+
+    add_library(implot STATIC
+        ${implot_SOURCE_DIR}/implot.cpp
+        ${implot_SOURCE_DIR}/implot_items.cpp
+    )
+    target_include_directories(implot PUBLIC ${implot_SOURCE_DIR})
+    target_link_libraries(implot PUBLIC imgui)
 
     add_library(glad STATIC
         third_party/glad/src/gl.c
@@ -136,9 +194,18 @@ if(ECOSIM_BUILD_VIEWER)
         src/render/Window.cpp
         src/render/Shader.cpp
         src/render/Mesh.cpp
+        src/render/DebugDraw.cpp
+        src/render/SimRenderer.cpp
     )
-    target_link_libraries(eco_render PUBLIC eco_world glfw glad)
+    target_link_libraries(eco_render PUBLIC eco_world eco_view eco_sim glfw glad)
 ecosim_enable_warnings(eco_render)
+
+    add_library(eco_ui STATIC
+        src/ui/UiManager.cpp
+        src/ui/Panels.cpp
+    )
+    target_link_libraries(eco_ui PUBLIC eco_view eco_sim imgui implot)
+    ecosim_enable_warnings(eco_ui)
 
     add_executable(ecosim_viewer
         apps/ecosim_viewer.cpp
@@ -151,6 +218,18 @@ ecosim_enable_warnings(ecosim_viewer)
             "${CMAKE_CURRENT_SOURCE_DIR}/assets"
             "$<TARGET_FILE_DIR:ecosim_viewer>/assets"
         COMMENT "Copying EcoSim assets next to the viewer")
+
+    add_executable(ecosim
+        apps/ecosim.cpp
+    )
+    target_link_libraries(ecosim PRIVATE eco_render eco_ui)
+    ecosim_enable_warnings(ecosim)
+
+    add_custom_command(TARGET ecosim POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+            "$<TARGET_FILE_DIR:ecosim>/assets"
+        COMMENT "Copying EcoSim assets next to ecosim")
 endif()
 
 enable_testing()
@@ -159,6 +238,9 @@ add_test(NAME sim COMMAND sim_tests)
 add_test(NAME behaviour COMMAND behaviour_tests)
 add_test(NAME reproduction COMMAND reproduction_tests)
 add_test(NAME world COMMAND world_tests)
+add_test(NAME view COMMAND view_tests)
+add_test(NAME ui COMMAND ui_tests)
+
 
 
 

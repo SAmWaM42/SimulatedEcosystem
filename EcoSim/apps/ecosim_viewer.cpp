@@ -117,6 +117,7 @@ int main(int argc, char** argv) {
                 litShader.setMat3("uNormalMatrix",
                                   glm::inverseTranspose(glm::mat3(model)));
                 litShader.setVec3("uColor", colors[i]);
+                litShader.setVec3("uEmissive", glm::vec3(0.f));
                 meshes[i]->draw();
             }
 

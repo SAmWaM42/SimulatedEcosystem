@@ -6,6 +6,8 @@
 
 #include "render/Window.h"
 
+#include <cmath>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 
@@ -44,6 +46,8 @@ Window::Window(int width, int height, const std::string& title) {
                            &framebufferHeight);
     glViewport(0, 0, framebufferWidth, framebufferHeight);
     glfwGetCursorPos(windowHandle, &lastMouseX, &lastMouseY);
+    previousKeys.assign(static_cast<std::size_t>(GLFW_KEY_LAST + 1), 0);
+    currentKeys.assign(static_cast<std::size_t>(GLFW_KEY_LAST + 1), 0);
 }
 
 Window::~Window() {
@@ -60,13 +64,23 @@ bool Window::shouldClose() const {
 void Window::pollEvents() {
     glfwPollEvents();
 
-    if (glfwGetKey(windowHandle, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    previousKeys = currentKeys;
+    for (int key = 0; key <= GLFW_KEY_LAST; ++key) {
+        currentKeys[static_cast<std::size_t>(key)] =
+            (glfwGetKey(windowHandle, key) == GLFW_PRESS) ? 1 : 0;
+    }
+
+    inputState.clicked = false;
+
+    if (currentKeys[GLFW_KEY_ESCAPE] != 0) {
         glfwSetWindowShouldClose(windowHandle, GLFW_TRUE);
     }
 
     double mouseX = 0.0;
     double mouseY = 0.0;
     glfwGetCursorPos(windowHandle, &mouseX, &mouseY);
+    inputState.mousePos = glm::vec2(static_cast<float>(mouseX),
+                                    static_cast<float>(mouseY));
     inputState.mouseDelta = glm::vec2(
         static_cast<float>(mouseX - lastMouseX),
         static_cast<float>(mouseY - lastMouseY));
@@ -74,30 +88,56 @@ void Window::pollEvents() {
     lastMouseY = mouseY;
 
     inputState.moveForward =
-        glfwGetKey(windowHandle, GLFW_KEY_W) == GLFW_PRESS ||
-        glfwGetKey(windowHandle, GLFW_KEY_UP) == GLFW_PRESS;
+        currentKeys[GLFW_KEY_W] != 0 || currentKeys[GLFW_KEY_UP] != 0;
     inputState.moveBack =
-        glfwGetKey(windowHandle, GLFW_KEY_S) == GLFW_PRESS ||
-        glfwGetKey(windowHandle, GLFW_KEY_DOWN) == GLFW_PRESS;
+        currentKeys[GLFW_KEY_S] != 0 || currentKeys[GLFW_KEY_DOWN] != 0;
     inputState.moveLeft =
-        glfwGetKey(windowHandle, GLFW_KEY_A) == GLFW_PRESS ||
-        glfwGetKey(windowHandle, GLFW_KEY_LEFT) == GLFW_PRESS;
+        currentKeys[GLFW_KEY_A] != 0 || currentKeys[GLFW_KEY_LEFT] != 0;
     inputState.moveRight =
-        glfwGetKey(windowHandle, GLFW_KEY_D) == GLFW_PRESS ||
-        glfwGetKey(windowHandle, GLFW_KEY_RIGHT) == GLFW_PRESS;
-    inputState.fast =
-        glfwGetKey(windowHandle, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-    inputState.orbitDrag =
+        currentKeys[GLFW_KEY_D] != 0 || currentKeys[GLFW_KEY_RIGHT] != 0;
+    inputState.fast = currentKeys[GLFW_KEY_LEFT_SHIFT] != 0;
+
+    const bool leftDown =
         glfwGetMouseButton(windowHandle, GLFW_MOUSE_BUTTON_LEFT) ==
         GLFW_PRESS;
+    inputState.orbitDrag = leftDown;
     inputState.panDrag =
         glfwGetMouseButton(windowHandle, GLFW_MOUSE_BUTTON_RIGHT) ==
             GLFW_PRESS ||
         glfwGetMouseButton(windowHandle, GLFW_MOUSE_BUTTON_MIDDLE) ==
             GLFW_PRESS;
 
+    if (leftDown && !leftMouseDown) {
+        clickCandidate = true;
+        clickStartX = mouseX;
+        clickStartY = mouseY;
+    }
+    if (!leftDown && leftMouseDown) {
+        if (clickCandidate) {
+            const double dx = mouseX - clickStartX;
+            const double dy = mouseY - clickStartY;
+            if (std::sqrt(dx * dx + dy * dy) < 4.0) {
+                inputState.clicked = true;
+                inputState.clickPos =
+                    glm::vec2(static_cast<float>(mouseX),
+                              static_cast<float>(mouseY));
+            }
+        }
+        clickCandidate = false;
+    }
+    leftMouseDown = leftDown;
+
     inputState.scroll = static_cast<float>(scrollAccumulator);
     scrollAccumulator = 0.0;
+}
+
+bool Window::keyPressed(int glfwKey) const {
+    if (glfwKey < 0 ||
+        static_cast<std::size_t>(glfwKey) >= currentKeys.size()) {
+        return false;
+    }
+    const std::size_t index = static_cast<std::size_t>(glfwKey);
+    return currentKeys[index] != 0 && previousKeys[index] == 0;
 }
 
 void Window::swapBuffers() {

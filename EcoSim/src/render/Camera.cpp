@@ -1,4 +1,4 @@
-// Orbit camera implementation: mouse orbit/pan, wheel zoom, WASD movement, and
+﻿// Orbit camera implementation: mouse orbit/pan, wheel zoom, WASD movement, and
 // terrain/eye clamping.
 #include "render/Camera.h"
 
@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include <glm/geometric.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "world/Terrain.h"
@@ -115,3 +116,33 @@ float Camera::yaw() const {
 void Camera::setTarget(const glm::vec3& t) {
     orbitTarget = t;
 }
+
+Ray Camera::screenRay(glm::vec2 pixel, int width, int height) const {
+    const float w = static_cast<float>(width);
+    const float h = static_cast<float>(height);
+    if (w <= 0.f || h <= 0.f) {
+        return {eye(), glm::vec3(0.f, 0.f, -1.f)};
+    }
+
+    const glm::mat4 inverseViewProjection =
+        glm::inverse(projectionMatrix(w / h) * viewMatrix());
+    const float ndcX = 2.f * pixel.x / w - 1.f;
+    const float ndcY = 1.f - 2.f * pixel.y / h;
+
+    glm::vec4 nearWorld = inverseViewProjection * glm::vec4(ndcX, ndcY, -1.f, 1.f);
+    glm::vec4 farWorld = inverseViewProjection * glm::vec4(ndcX, ndcY, 1.f, 1.f);
+    nearWorld /= nearWorld.w;
+    farWorld /= farWorld.w;
+
+    Ray ray;
+    ray.origin = eye();
+    ray.direction = glm::normalize(glm::vec3(farWorld - nearWorld));
+    return ray;
+}
+
+void Camera::followTarget(glm::vec2 xz, float dt) {
+    const float fraction = std::min(1.f, 8.f * dt);
+    orbitTarget.x += (xz.x - orbitTarget.x) * fraction;
+    orbitTarget.z += (xz.y - orbitTarget.z) * fraction;
+}
+

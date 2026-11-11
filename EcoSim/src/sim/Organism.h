@@ -1,4 +1,4 @@
-// Organism hierarchy for the headless simulation: plants, animals, and the
+﻿// Organism hierarchy for the headless simulation: plants, animals, and the
 // herbivore/predator specialisations with behaviour and reproduction.
 #pragma once
 
@@ -36,9 +36,12 @@ public:
     virtual Kind kind() const = 0;
     // Advances one fixed step; implementations must do nothing when dead.
     virtual void update(float dt, Simulation& sim) = 0;
+    // Saves the current state used by render interpolation.
+    virtual void savePrevious();
 
     uint32_t id;
     glm::vec2 position;
+    glm::vec2 prevPosition;  // position at the start of the current step
     bool alive = true;  // false marks the organism for removal at the end of a step
     float age = 0.f;
     DeathCause deathCause = DeathCause::None;
@@ -69,6 +72,8 @@ public:
            float lifeSpan, const SimConfig& cfg, Rng& rng);
     // Applies upkeep, ageing, gestation, decisions, and movement for one step.
     void update(float dt, Simulation& sim) override;
+    // Saves both position and heading for interpolation.
+    void savePrevious() override;
 
     genetics::Genome genome;
     genetics::Sex sex;
@@ -76,7 +81,8 @@ public:
     float energy;
     float speed;
     float maxAge;
-    float heading;  // radians; random at birth and changed by the state machine
+    float heading;      // radians; random at birth and changed by the state machine
+    float prevHeading;  // heading at the start of the current step
     uint32_t motherId = 0;
     uint32_t fatherId = 0;
     int generation = 0;
@@ -196,3 +202,4 @@ protected:
     // Predators have a hunting sense wider than their raw sight trait.
     float perceptionRange() const override;
 };
+

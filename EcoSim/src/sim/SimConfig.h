@@ -71,3 +71,17 @@ struct SimConfig {
     // genetics
     genetics::GeneticsConfig genetics;
 };
+
+// Copies only the settings that the UI may change while a simulation is
+// running. Other fields are applied when the simulation is recreated.
+inline void copyLiveTunables(const SimConfig& from, SimConfig& to) {
+    to.genetics.sightMutationRate = from.genetics.sightMutationRate;
+    to.genetics.sightMutationSd = from.genetics.sightMutationSd;
+    to.genetics.colourMutationRate = from.genetics.colourMutationRate;
+    to.sightUpkeep = from.sightUpkeep;
+    to.plantSpawnMin = from.plantSpawnMin;
+    to.plantSpawnMax = from.plantSpawnMax;
+    to.plantEnergyValue = from.plantEnergyValue;
+    to.predatorCatchChance = from.predatorCatchChance;
+    to.enableRescue = from.enableRescue;
+}

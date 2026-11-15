@@ -17,6 +17,7 @@
 namespace {
 // Five octaves at base frequency 3.5, lacunarity 2, gain 0.5.
 constexpr int kOctaves = 5;
+constexpr float kFeatureScale = 3000.f;  // keeps hills the same physical size
 constexpr float kBaseFrequency = 3.5f;
 constexpr float kLacunarity = 2.f;
 constexpr float kGain = 0.5f;
@@ -245,8 +246,10 @@ float Terrain::ridged(float x, float z) const {
 }
 
 float Terrain::generateRawHeight(float x, float z) const {
-    const float u = (cfg.size > 0.f) ? x / cfg.size : 0.f;
-    const float v = (cfg.size > 0.f) ? z / cfg.size : 0.f;
+    // Use a fixed physical feature scale rather than normalising by map size:
+    // enlarging the map adds more hills instead of stretching the same hills.
+    const float u = x / kFeatureScale;
+    const float v = z / kFeatureScale;
 
     // A low-frequency warp offsets both lookup axes by about 0.15 of a lattice
     // cell, breaking up the grid-aligned look without displacing the terrain

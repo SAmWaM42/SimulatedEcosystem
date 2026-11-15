@@ -7,7 +7,7 @@
 // All tunable world, plant, animal, and genetics settings in one plain struct.
 struct SimConfig {
     // world
-    float worldSize = 3000.f;
+    float worldSize = 6000.f;
     float fixedDt = 1.f / 30.f;
     float boundaryMargin = 150.f;
     float spatialCellSize = 200.f;

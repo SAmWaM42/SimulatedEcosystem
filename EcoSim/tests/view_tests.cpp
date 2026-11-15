@@ -158,7 +158,9 @@ TEST_CASE("camera centre ray reaches the target") {
     const Ray ray = camera.screenRay(glm::vec2(400.f, 300.f), 800, 600);
     CHECK(glm::length(ray.direction) == doctest::Approx(1.f));
     const glm::vec3 toTarget = camera.target() - ray.origin;
-    CHECK(glm::length(glm::cross(toTarget, ray.direction)) <= 1.f);
+    // Allow a tiny angular error scaled with the longer camera distance.
+    CHECK(glm::length(glm::cross(toTarget, ray.direction)) <=
+          1.0e-3f * glm::length(toTarget));
 }
 
 TEST_CASE("picking chooses the nearest organism") {

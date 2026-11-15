@@ -52,3 +52,5 @@ out.txt
 # GLFW extracted downloads (temporary)
 glfw-3.4.bin.*/
 glfw-3.4.zip
+
+split-snapshots/

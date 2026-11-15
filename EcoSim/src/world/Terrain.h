@@ -10,8 +10,8 @@
 
 // Tunables for the deterministic gradient-noise terrain.
 struct TerrainConfig {
-    int resolution = 257;      // vertices per side
-    float size = 3000.f;       // world units per side
+    int resolution = 513;      // vertices per side; keeps detail on the larger map
+    float size = 6000.f;       // world units per side
     float maxHeight = 120.f;
     float waterFraction = 0.2f;  // share of the map under water
     std::uint32_t seed = 20;

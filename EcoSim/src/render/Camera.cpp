@@ -28,7 +28,7 @@ Camera::Camera(const Terrain& terrain)
                   terrain.config().size * 0.5f),
       orbitYaw(0.8f),
       orbitPitch(0.7f),
-      orbitDistance(1800.f) {
+      orbitDistance(std::max(terrain.config().size * 0.6f, kMinDistance)) {
     orbitTarget.y = terrain.heightAt(orbitTarget.x, orbitTarget.z);
 }
 
@@ -60,7 +60,10 @@ void Camera::update(const InputState& in, float dt, const Terrain& terrain) {
                    (orbitDistance * kMoveSensitivity * dt * fastMultiplier);
 
     orbitPitch = std::clamp(orbitPitch, kMinPitch, kMaxPitch);
-    orbitDistance = std::clamp(orbitDistance, kMinDistance, kMaxDistance);
+    // Larger maps need more zoom-out room to see the added territory.
+    const float maxDistance =
+        std::max(kMaxDistance, terrain.config().size * 1.2f);
+    orbitDistance = std::clamp(orbitDistance, kMinDistance, maxDistance);
 
     orbitTarget.x = std::clamp(orbitTarget.x, 0.f, terrain.config().size);
     orbitTarget.z = std::clamp(orbitTarget.z, 0.f, terrain.config().size);
@@ -86,7 +89,9 @@ glm::mat4 Camera::viewMatrix() const {
 }
 
 glm::mat4 Camera::projectionMatrix(float aspect) const {
-    return glm::perspective(glm::radians(50.f), aspect, 1.f, 10000.f);
+    // Keep the far plane comfortably beyond the zoomed-out world.
+    const float farPlane = std::max(10000.f, orbitDistance * 4.f);
+    return glm::perspective(glm::radians(50.f), aspect, 1.f, farPlane);
 }
 
 glm::vec3 Camera::eye() const {

@@ -30,6 +30,7 @@
 #include "render/MeshFactory.h"
 #include "render/Picking.h"
 #include "render/Shader.h"
+#include "render/ShadowMap.h"
 #include "render/SimRenderer.h"
 #include "render/Window.h"
 #include "sim/SimClock.h"
@@ -199,14 +200,22 @@ int main(int argc, char** argv) {
                              assetPath("shaders/terrain.frag"));
         Shader waterShader(assetPath("shaders/water.vert"),
                            assetPath("shaders/water.frag"));
+        Shader shadowShader(assetPath("shaders/shadow.vert"),
+                            assetPath("shaders/shadow.frag"));
         Mesh terrainMesh(makeTerrainMesh(terrain));
         Mesh waterMesh(makePlane());
+        ShadowMap shadowMap(2048);
 
         const glm::vec3 lightDirection =
             glm::normalize(glm::vec3(-0.4f, -1.0f, -0.3f));
         const glm::vec3 fogColour(0.53f, 0.81f, 0.92f);
         const float worldCentre = runConfig.worldSize * 0.5f;
         const float bodyRadius = runConfig.bodyRadius;
+        const glm::vec3 shadowCentre(
+            worldCentre, terrain.config().maxHeight * 0.5f, worldCentre);
+        const glm::mat4 lightSpace =
+            shadowLightSpaceMatrix(lightDirection, shadowCentre,
+                                   runConfig.worldSize);
 
         std::uint32_t selectedId = 0;
         bool follow = false;
@@ -241,6 +250,12 @@ int main(int argc, char** argv) {
                 camera.projectionMatrix(window.aspect());
             const glm::vec3 cameraPosition = camera.eye();
 
+            shadowMap.beginRender();
+            shadowShader.use();
+            shadowShader.setMat4("uLightSpaceMatrix", lightSpace);
+            renderer.drawShadows(*simulation, terrain, shadowShader, alpha);
+            shadowMap.endRender();
+
             terrainShader.use();
             terrainShader.setMat4("uModel", glm::mat4(1.f));
             terrainShader.setMat4("uView", view);
@@ -251,6 +266,12 @@ int main(int argc, char** argv) {
             terrainShader.setFloat("uWaterLevel", terrain.waterLevel());
             terrainShader.setVec3("uFogColor", fogColour);
             terrainShader.setFloat("uFogDensity", kFogDensity);
+            terrainShader.setInt("uShadowEnabled", 1);
+            terrainShader.setInt("uShadowMap", 0);
+            terrainShader.setMat4("uLightSpaceMatrix", lightSpace);
+            terrainShader.setFloat("uShadowBias", 0.00035f);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, shadowMap.texture());
             terrainMesh.draw();
 
             litShader.use();

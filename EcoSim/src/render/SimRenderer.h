@@ -24,6 +24,9 @@ public:
     // Draws the current population using shared uniforms already set on lit.
     void draw(const Simulation& sim, const Terrain& terrain, Shader& lit,
               float alpha, float frameDt, uint32_t selectedId);
+    // Renders only organism geometry into the sun's depth-only shadow map.
+    void drawShadows(const Simulation& sim, const Terrain& terrain,
+                     Shader& shadowShader, float alpha);
     // Forgets snapshots and active death effects.
     void reset();
     // Number of primitive draw calls issued by the most recent draw().

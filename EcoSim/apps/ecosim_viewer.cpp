@@ -86,6 +86,8 @@ int main(int argc, char** argv) {
             terrainShader.setFloat("uWaterLevel", terrain.waterLevel());
             terrainShader.setVec3("uFogColor", fogColour);
             terrainShader.setFloat("uFogDensity", kFogDensity);
+            // The standalone viewer has no organism casters.
+            terrainShader.setInt("uShadowEnabled", 0);
             terrainMesh.draw();
 
             const float centre = terrain.config().size * 0.5f;

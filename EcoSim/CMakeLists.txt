@@ -211,6 +211,7 @@ if(ECOSIM_BUILD_VIEWER)
         src/render/Mesh.cpp
         src/render/DebugDraw.cpp
         src/render/SimRenderer.cpp
+        src/render/ShadowMap.cpp
     )
     target_link_libraries(eco_render PUBLIC eco_world eco_view eco_sim glfw glad)
 ecosim_enable_warnings(eco_render)

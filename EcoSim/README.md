@@ -10,6 +10,7 @@ population trends.
 
 - Seeded gradient-noise terrain with fBm, ridges, lakes, sandy shores, green
   highlands, and fog.
+- Dynamic sun shadows cast by plants and animals onto the terrain.
 - Animated water with moving ripples and grazing-angle opacity.
 - Plant growth and spread plus herbivore and predator behaviour.
 - Mendelian inheritance, sight and colour mutation, reproduction, and ageing.

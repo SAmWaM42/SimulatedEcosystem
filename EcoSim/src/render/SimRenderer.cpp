@@ -324,3 +324,57 @@ void SimRenderer::draw(const Simulation& sim, const Terrain& terrain,
     activeShader = nullptr;
 }
 
+void SimRenderer::drawShadows(const Simulation& sim, const Terrain& terrain,
+                              Shader& shadowShader, float alpha) {
+    // The depth shader only needs uModel/uLightSpaceMatrix; the colour and
+    // emissive setters in drawMesh resolve to -1 and are ignored by OpenGL.
+    activeShader = &shadowShader;
+    const int savedDrawCalls = currentDrawCalls;
+    currentDrawCalls = 0;
+
+    const float bodyRadius = sim.config().bodyRadius;
+    const float time = static_cast<float>(sim.time());
+
+    for (const std::unique_ptr<Organism>& organism : sim.organisms()) {
+        if (!organism->alive) {
+            continue;
+        }
+
+        const glm::vec2 position =
+            organism->prevPosition +
+            (organism->position - organism->prevPosition) * alpha;
+        const float ground = terrain.heightAt(position.x, position.y);
+        const glm::vec3 shadowColour(0.f);
+
+        if (organism->kind() == Kind::Plant) {
+            const float sizeVariation = 0.85f + 0.3f * hash01(organism->id);
+            const float grow = smoothstep(0.f, 4.f, organism->age);
+            const float overall = sizeVariation * grow;
+            const float sway = 0.03f * std::sin(time + organism->id);
+            drawPlant(position, ground, 0.f, overall, sway, shadowColour,
+                      bodyRadius);
+            continue;
+        }
+
+        const Animal* animal = dynamic_cast<const Animal*>(organism.get());
+        if (animal == nullptr) {
+            continue;
+        }
+        const float heading =
+            lerpAngle(animal->prevHeading, animal->heading, alpha);
+        const float ageFraction =
+            std::clamp(animal->age / sim.config().maturityAge, 0.f, 1.f);
+        const float ageScale = 0.5f + 0.5f * ageFraction;
+        const float popIn = smoothstep(0.f, 1.f, animal->age);
+        const bool male = (animal->sex == genetics::Sex::Male);
+        const float overall = ageScale * popIn * (male ? 1.1f : 1.f);
+        const float phase =
+            8.f * time * gaitForState(animal->state()) + 0.9f * animal->id;
+        drawAnimal(animal->kind(), position, ground, heading, shadowColour,
+                   overall, male, phase, 0.f, shadowColour, bodyRadius);
+    }
+
+    currentDrawCalls = savedDrawCalls;
+    activeShader = nullptr;
+}
+

@@ -10,6 +10,10 @@ uniform vec3 uCameraPos;   // camera eye position for fog distance
 uniform float uWaterLevel; // world-space height of the water plane
 uniform vec3 uFogColor;    // sky/clear colour that distant terrain fades into
 uniform float uFogDensity; // fog amount per world unit; app default 0.00012
+uniform bool uShadowEnabled;      // true in the simulation, false in the viewer
+uniform sampler2D uShadowMap;    // depth-only organism shadow map
+uniform mat4 uLightSpaceMatrix;  // world position -> light clip space
+uniform float uShadowBias;       // depth bias in light-space units
 
 out vec4 FragColor;
 
@@ -29,6 +33,35 @@ float valueNoise(vec2 p) {
     float c = hash21(cell + vec2(0.0, 1.0));
     float d = hash21(cell + vec2(1.0, 1.0));
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// 3x3 PCF lookup against the sun's depth map.
+float sunShadow(vec3 worldPos, vec3 normal, vec3 lightDirection) {
+    if (!uShadowEnabled) {
+        return 1.0;
+    }
+
+    vec4 lightClip = uLightSpaceMatrix * vec4(worldPos, 1.0);
+    vec3 projection = lightClip.xyz / lightClip.w;
+    projection = projection * 0.5 + 0.5;
+    if (projection.x < 0.0 || projection.x > 1.0 ||
+        projection.y < 0.0 || projection.y > 1.0 ||
+        projection.z > 1.0) {
+        return 1.0;
+    }
+
+    float bias = uShadowBias *
+                 (1.0 - max(dot(normal, lightDirection), 0.0));
+    vec2 texel = 1.0 / vec2(textureSize(uShadowMap, 0));
+    float visible = 0.0;
+    for (int y = -1; y <= 1; ++y) {
+        for (int x = -1; x <= 1; ++x) {
+            float closest = texture(
+                uShadowMap, projection.xy + vec2(x, y) * texel).r;
+            visible += projection.z - bias > closest ? 0.0 : 1.0;
+        }
+    }
+    return visible / 9.0;
 }
 
 void main() {
@@ -57,6 +90,10 @@ void main() {
 
     vec3 color =
         baseColor * (ambient + diffuse * vec3(0.95, 0.92, 0.82));
+
+    // Dynamic organism shadows darken the direct-light contribution.
+    float shadow = sunShadow(vWorldPos, normal, light);
+    color *= mix(0.62, 1.0, shadow);
 
     // Exponential-squared distance fog; density is zero-safe.
     float distanceToCamera = length(uCameraPos - vWorldPos);

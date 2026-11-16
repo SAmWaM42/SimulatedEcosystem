@@ -1,0 +1,2 @@
+This folder contains the main renderer class that will be referenced to draw objects
+THis class should be robust enough that it will only need to be implemented once

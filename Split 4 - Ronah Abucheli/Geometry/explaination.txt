@@ -1,0 +1,2 @@
+This folder contains the geometry phase of the rendering process
+it may also be used for world gen
